@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bloom — Ovulation Tracker</title>
+<meta name="description" content="A private, simple ovulation and period tracker. Your data stays on your device.">
+<meta name="theme-color" content="#FBF6F3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#17131A" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Bloom">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FBF6F3; --surface:#FFFFFF; --surface-2:#F5EEEA; --line:#EDE3DE;
+  --ink:#2A2230; --ink-2:#6E6474; --ink-3:#A39AA6;
+  --period:#E0526F; --period-soft:#FBE3E8; --period-ink:#B23452;
+  --fertile:#33A396; --fertile-soft:#DDF2EF; --fertile-ink:#1D7469;
+  --ovu:#6A4FD0; --ovu-soft:#ECE7FB;
+  --accent:#2A2230; --accent-ink:#FFFFFF;
+  --shadow:0 1px 2px rgba(42,34,48,.04),0 8px 24px rgba(42,34,48,.06);
+  --r:20px; --r-sm:12px;
+  --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#17131A; --surface:#211B25; --surface-2:#2A232F; --line:#352D3B;
+    --ink:#F4EEF6; --ink-2:#B9AFBF; --ink-3:#7E7484;
+    --period:#F0657F; --period-soft:#4A2330; --period-ink:#FF9AAD;
+    --fertile:#4CC2B3; --fertile-soft:#173B37; --fertile-ink:#7FDCCF;
+    --ovu:#9A84F5; --ovu-soft:#2F2752;
+    --accent:#F4EEF6; --accent-ink:#17131A;
+    --shadow:0 1px 2px rgba(0,0,0,.2),0 8px 24px rgba(0,0,0,.25);
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font-family:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased;min-height:100vh;min-height:100dvh}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+h1,h2,h3{margin:0;font-weight:600}
+.serif{font-family:"Fraunces",Georgia,serif;font-optical-sizing:auto;letter-spacing:-.01em}
+.muted{color:var(--ink-2)}
+.tiny{font-size:12px;color:var(--ink-3)}
+[hidden]{display:none!important}
+
+/* ---------- layout ---------- */
+.app{max-width:520px;margin:0 auto;padding:calc(var(--safe-t) + 18px) 18px calc(var(--safe-b) + 96px)}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px}
+.brand-mark{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:var(--period-soft)}
+.date-chip{font-size:13px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);padding:6px 12px;border-radius:99px}
+.screen{display:none;animation:fade .25s ease}
+.screen.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.section-title{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);margin:26px 4px 10px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:18px}
+.stack>*+*{margin-top:12px}
+
+/* ---------- tab bar ---------- */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--line);padding:8px 10px calc(var(--safe-b) + 8px)}
+.tabbar-inner{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;font-size:11.5px;font-weight:600;color:var(--ink-3);border-radius:12px;transition:color .2s}
+.tab svg{width:22px;height:22px}
+.tab.active{color:var(--ink)}
+.tab.active .tab-ico{background:var(--surface-2)}
+.tab-ico{padding:3px 14px;border-radius:99px;display:grid;place-items:center;transition:background .2s}
+
+/* ---------- today ---------- */
+.hero{padding:22px 18px 20px;text-align:center}
+.dial-wrap{position:relative;width:min(300px,78vw);aspect-ratio:1;margin:0 auto}
+.dial-wrap svg{width:100%;height:100%;display:block;overflow:visible}
+.dial-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 22%}
+.dial-kicker{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.dial-main{font-size:40px;line-height:1.05;margin:4px 0 6px}
+.dial-sub{font-size:13.5px;color:var(--ink-2)}
+.chance{display:inline-flex;align-items:center;gap:6px;margin-top:16px;padding:7px 14px;border-radius:99px;font-size:13px;font-weight:600;background:var(--surface-2)}
+.chance .dot{width:8px;height:8px;border-radius:50%;background:var(--ink-3)}
+.chance.low .dot{background:var(--ink-3)}
+.chance.med{background:var(--fertile-soft);color:var(--fertile-ink)} .chance.med .dot{background:var(--fertile)}
+.chance.high{background:var(--fertile-soft);color:var(--fertile-ink)} .chance.high .dot{background:var(--fertile);box-shadow:0 0 0 3px color-mix(in srgb,var(--fertile) 30%,transparent)}
+.chance.peak{background:var(--ovu-soft);color:var(--ovu)} .chance.peak .dot{background:var(--ovu);box-shadow:0 0 0 3px color-mix(in srgb,var(--ovu) 30%,transparent)}
+.chance.period{background:var(--period-soft);color:var(--period-ink)} .chance.period .dot{background:var(--period)}
+.late-banner{margin-top:14px;font-size:13px;color:var(--period-ink);background:var(--period-soft);border-radius:var(--r-sm);padding:10px 12px;text-align:left}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 18px;border-radius:14px;font-weight:600;font-size:14.5px;transition:transform .1s,opacity .2s}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--accent);color:var(--accent-ink)}
+.btn-period{background:var(--period);color:#fff}
+.btn-ghost{background:var(--surface-2);color:var(--ink)}
+.btn-danger{background:var(--period-soft);color:var(--period-ink)}
+.btn-block{width:100%}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 12px;box-shadow:var(--shadow)}
+.stat-label{font-size:11.5px;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:6px}
+.stat-label i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.stat-val{font-size:19px;margin-top:6px;line-height:1.1}
+.stat-sub{font-size:12px;color:var(--ink-2);margin-top:3px}
+.today-log{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.pill{font-size:12.5px;padding:5px 10px;border-radius:99px;background:var(--surface-2);color:var(--ink-2);font-weight:500}
+.pill.p{background:var(--period-soft);color:var(--period-ink)}
+.pill.f{background:var(--fertile-soft);color:var(--fertile-ink)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.link{color:var(--ink);font-weight:600;font-size:13.5px;text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line)}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.week .wd{font-size:11px;font-weight:600;color:var(--ink-3)}
+.week .wn{margin:6px auto 0;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:13.5px;font-weight:600;position:relative}
+
+.install-banner{position:relative;display:flex;align-items:center;gap:12px;margin-top:18px;padding:14px 38px 14px 14px;border-radius:var(--r);background:var(--ovu-soft);color:var(--ink)}
+.today-grid>div:last-child>.install-banner{margin-top:0}
+.ib-ico{width:42px;height:42px;flex-shrink:0;border-radius:12px;display:grid;place-items:center;background:var(--surface);color:var(--ovu)}
+.ib-text{flex:1;display:flex;flex-direction:column;font-size:13px;color:var(--ink-2);line-height:1.35}
+.ib-text b{color:var(--ink);font-size:14px;margin-bottom:2px}
+.ib-btn{height:38px;padding:0 16px;font-size:13.5px}
+.ib-x{position:absolute;top:6px;right:8px;width:28px;height:28px;font-size:20px;color:var(--ink-3);line-height:1}
+.share-ico{display:inline-block;vertical-align:-3px;width:16px;height:16px}
+
+
+/* ---------- calendar ---------- */
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.cal-title{font-size:24px}
+.icon-btn{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line)}
+.icon-btn svg{width:18px;height:18px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-dow{text-align:center;font-size:11.5px;font-weight:600;color:var(--ink-3);padding-bottom:6px}
+.day{position:relative;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;font-size:14px;font-weight:500;color:var(--ink);transition:transform .1s}
+.day:active{transform:scale(.94)}
+.day.out{visibility:hidden}
+.day.future{color:var(--ink)}
+.day.period{background:var(--period);color:#fff;font-weight:700}
+.day.pred{background:transparent;box-shadow:inset 0 0 0 1.5px var(--period);color:var(--period-ink);font-weight:600;background-image:repeating-linear-gradient(135deg,transparent 0 5px,color-mix(in srgb,var(--period) 14%,transparent) 5px 7px)}
+.day.fertile{background:var(--fertile-soft);color:var(--fertile-ink);font-weight:600}
+.day.ovu{background:var(--ovu);color:#fff;font-weight:700}
+.day.today::after{content:"";position:absolute;inset:-3px;border-radius:50%;border:2px solid var(--ink)}
+.day .mark{position:absolute;bottom:12%;left:50%;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:currentColor;opacity:.75}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:16px;font-size:12.5px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.sw{width:14px;height:14px;border-radius:50%;display:inline-block}
+.sw.p{background:var(--period)} .sw.pp{box-shadow:inset 0 0 0 1.5px var(--period)} .sw.f{background:var(--fertile-soft);box-shadow:inset 0 0 0 1px var(--fertile)} .sw.o{background:var(--ovu)}
+
+/* ---------- insights ---------- */
+.big-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.big-stats .stat-val{font-size:30px}
+.cycle-row{display:grid;grid-template-columns:86px 1fr 34px;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:13px}
+.cycle-row:first-child{border-top:0}
+.bar{height:10px;border-radius:99px;background:var(--surface-2);overflow:hidden;display:flex}
+.bar b{display:block;height:100%;background:var(--period)}
+.bar em{display:block;height:100%;background:color-mix(in srgb,var(--ink-3) 40%,transparent)}
+.sym-row{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13.5px}
+.sym-row .bar{flex:1;height:8px} .sym-row .bar b{background:var(--ovu)}
+.empty{text-align:center;padding:26px 10px;color:var(--ink-2);font-size:14px}
+
+/* ---------- settings ---------- */
+.set-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-top:1px solid var(--line)}
+.set-row:first-child{border-top:0;padding-top:2px}
+.set-row:last-child{padding-bottom:2px}
+.set-label{font-weight:600;font-size:14.5px}
+.set-help{font-size:12.5px;color:var(--ink-2);margin-top:2px}
+.stepper{display:flex;align-items:center;gap:4px;background:var(--surface-2);border-radius:12px;padding:3px;flex-shrink:0}
+.stepper button{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;font-size:18px;font-weight:600}
+.stepper button:active{background:var(--surface)}
+.stepper output{min-width:34px;text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
+.switch{position:relative;width:48px;height:28px;flex-shrink:0}
+.switch input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer;z-index:1}
+.switch span{position:absolute;inset:0;border-radius:99px;background:var(--line);transition:background .2s}
+.switch span::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .2s}
+.switch input:checked+span{background:var(--fertile)}
+.switch input:checked+span::after{transform:translateX(20px)}
+.note{font-size:12.5px;color:var(--ink-2);background:var(--surface-2);border-radius:var(--r-sm);padding:12px 14px;line-height:1.5}
+
+/* ---------- sheet / dialog ---------- */
+.scrim{position:fixed;inset:0;z-index:40;background:rgba(20,14,24,.4);opacity:0;pointer-events:none;transition:opacity .25s}
+.scrim.open{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:50;max-width:560px;margin:0 auto;background:var(--surface);border-radius:26px 26px 0 0;max-height:90vh;max-height:90dvh;display:flex;flex-direction:column;transform:translateY(105%);visibility:hidden;transition:transform .3s cubic-bezier(.2,.8,.2,1),visibility 0s .3s;box-shadow:0 -10px 40px rgba(0,0,0,.15)}
+.sheet.open{transform:none;visibility:visible;transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.sheet-grab{width:40px;height:5px;border-radius:99px;background:var(--line);margin:10px auto 0}
+.sheet-head{padding:12px 20px 12px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line)}
+.sheet-body{padding:6px 20px 20px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.sheet-foot{padding:12px 20px calc(var(--safe-b) + 14px);border-top:1px solid var(--line)}
+.field-label{font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);margin:20px 0 10px}
+.seg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.seg button,.chip{padding:10px 6px;border-radius:12px;background:var(--surface-2);font-size:13.5px;font-weight:600;color:var(--ink-2);border:1.5px solid transparent;transition:all .15s}
+.seg button.on{background:var(--period-soft);color:var(--period-ink);border-color:var(--period)}
+.seg button[data-v="0"].on{background:var(--surface);color:var(--ink);border-color:var(--ink-3)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:8px 13px;font-weight:500}
+.chip.on{background:var(--ovu-soft);color:var(--ovu);border-color:var(--ovu);font-weight:600}
+.chips.lh .chip.on{background:var(--fertile-soft);color:var(--fertile-ink);border-color:var(--fertile)}
+.inline-input{display:flex;align-items:center;gap:8px}
+.input{width:100%;height:46px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);padding:0 14px;outline:none;transition:border-color .2s}
+.input:focus{border-color:var(--ink-3)}
+textarea.input{height:auto;min-height:80px;padding:12px 14px;resize:vertical}
+.fill-hint{margin-top:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;background:var(--period-soft);color:var(--period-ink);padding:10px 12px;border-radius:12px}
+.fill-hint button{font-weight:700;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
+.dialog{position:fixed;z-index:60;left:50%;top:50%;width:min(360px,calc(100vw - 40px));transform:translate(-50%,-46%) scale(.97);opacity:0;pointer-events:none;background:var(--surface);border-radius:22px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.25);transition:all .2s}
+.dialog.open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%)}
+.dialog h3{font-size:20px;margin-bottom:8px}
+.dialog p{margin:0 0 18px;color:var(--ink-2);font-size:14px}
+.dialog .actions{margin-top:0}
+.toast{position:fixed;left:50%;bottom:calc(var(--safe-b) + 92px);z-index:70;transform:translate(-50%,20px);opacity:0;background:var(--accent);color:var(--accent-ink);padding:11px 18px;border-radius:99px;font-size:13.5px;font-weight:600;transition:all .25s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* ---------- onboarding ---------- */
+.onboard{max-width:440px;margin:0 auto;padding:calc(var(--safe-t) + 40px) 22px calc(var(--safe-b) + 30px);min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+.onboard h1{font-size:34px;line-height:1.1;margin:22px 0 10px}
+.onboard .q{margin-top:26px}
+.onboard .q-label{font-weight:600;margin-bottom:10px}
+.onboard .q-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.ob-art{width:64px;height:64px;border-radius:20px;background:var(--period-soft);display:grid;place-items:center}
+.unsure{font-size:13px;color:var(--ink-2);margin-top:8px}
+.unsure label{display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.ob-foot{margin-top:auto;padding-top:28px}
+
+/* ---------- desktop ---------- */
+@media (min-width:960px){
+  body{font-size:15.5px}
+  .app{max-width:1080px;padding:32px 40px 60px 260px}
+  .tabbar{top:0;bottom:0;right:auto;width:220px;border-top:0;border-right:1px solid var(--line);padding:96px 14px 24px;background:var(--surface)}
+  .tabbar-inner{display:flex;flex-direction:column;gap:4px;max-width:none}
+  .tab{flex-direction:row;gap:12px;padding:10px 12px;font-size:14.5px;justify-content:flex-start}
+  .tab-ico{padding:0;background:none!important}
+  .tab.active{background:var(--surface-2)}
+  .topbar{position:fixed;top:28px;left:28px;z-index:30;margin:0}
+  .topbar .date-chip{display:none}
+  .today-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:22px;align-items:start}
+  .today-grid .section-title:first-child{margin-top:0}
+  .cal-wrap{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:22px;align-items:start}
+  .ins-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
+  .set-wrap{max-width:620px}
+  .sheet{bottom:auto;top:50%;left:50%;right:auto;width:520px;border-radius:26px;transform:translate(-50%,-46%);opacity:0;pointer-events:none;transition:all .22s}
+  .sheet.open{transform:translate(-50%,-50%);opacity:1;pointer-events:auto;visibility:visible}
+  .sheet-grab{display:none}
+  .toast{bottom:32px}
+  .day{aspect-ratio:auto;height:54px;border-radius:16px}
+  .day.today::after{border-radius:18px}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ ONBOARDING ============ -->
+<div id="onboard" class="onboard" hidden>
+  <div class="ob-art"><svg width="34" height="34" viewBox="0 0 24 24" fill="none"><path d="M12 3c3.5 4 6 7.3 6 10.5A6 6 0 0 1 6 13.5C6 10.3 8.5 7 12 3Z" fill="var(--period)"/></svg></div>
+  <h1 class="serif">Know your cycle, gently.</h1>
+  <p class="muted">Bloom estimates your fertile window, ovulation day and next period. Everything stays private on this device.</p>
+
+  <div class="q">
+    <div class="q-label">When did your last period start?</div>
+    <input id="obDate" class="input" type="date">
+  </div>
+  <div class="q">
+    <div class="q-row">
+      <div><div class="q-label" style="margin:0">How many days does it usually last?</div></div>
+      <div class="stepper" data-ob="period"><button type="button" data-d="-1" aria-label="Fewer days">−</button><output id="obPeriod">5</output><button type="button" data-d="1" aria-label="More days">+</button></div>
+    </div>
+  </div>
+  <div class="q">
+    <div class="q-row">
+      <div><div class="q-label" style="margin:0">Usual cycle length</div><div class="tiny">First day of one period to the next</div></div>
+      <div class="stepper" data-ob="cycle"><button type="button" data-d="-1" aria-label="Shorter">−</button><output id="obCycle">28</output><button type="button" data-d="1" aria-label="Longer">+</button></div>
+    </div>
+    <div class="unsure"><label><input type="checkbox" id="obUnsure"> Not sure — use 28 days for now</label></div>
+  </div>
+
+  <div class="ob-foot">
+    <button id="obStart" class="btn btn-primary btn-block">Start tracking</button>
+    <p class="tiny" style="text-align:center;margin-top:14px">Predictions are estimates and are not a form of birth control.</p>
+  </div>
+</div>
+
+<!-- ============ MAIN APP ============ -->
+<div id="main" hidden>
+<div class="app">
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 3c3.5 4 6 7.3 6 10.5A6 6 0 0 1 6 13.5C6 10.3 8.5 7 12 3Z" fill="var(--period)"/></svg></span>Bloom</div>
+    <span class="date-chip" id="dateChip"></span>
+  </header>
+
+  <!-- TODAY -->
+  <section class="screen active" id="s-today">
+    <div class="today-grid">
+      <div>
+        <div class="card hero">
+          <div class="dial-wrap">
+            <svg id="dial" viewBox="0 0 300 300" aria-hidden="true"></svg>
+            <div class="dial-center">
+              <div class="dial-kicker" id="dialKicker">Cycle day</div>
+              <div class="dial-main serif" id="dialMain">—</div>
+              <div class="dial-sub" id="dialSub"></div>
+            </div>
+          </div>
+          <div class="chance" id="chance"><span class="dot"></span><span id="chanceText"></span></div>
+          <div class="late-banner" id="lateBanner" hidden></div>
+          <div class="actions">
+            <button class="btn btn-period" id="periodBtn">Period started</button>
+            <button class="btn btn-ghost" id="logTodayBtn">Log today</button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="install-banner" id="installBanner" hidden>
+          <div class="ib-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M12 8v6M9 11l3 3 3-3"/></svg></div>
+          <div class="ib-text"><b>Add Bloom to your home screen</b><span id="ibHelp">Opens like an app and works offline.</span></div>
+          <button class="btn btn-primary ib-btn" id="ibInstall">Add</button>
+          <button class="ib-x" id="ibClose" aria-label="Dismiss">×</button>
+        </div>
+        <div class="section-title">Coming up</div>
+        <div class="stats">
+          <div class="stat"><div class="stat-label"><i style="background:var(--period)"></i>Period</div><div class="stat-val serif" id="stNext">—</div><div class="stat-sub" id="stNextSub"></div></div>
+          <div class="stat"><div class="stat-label"><i style="background:var(--fertile)"></i>Fertile</div><div class="stat-val serif" id="stFert">—</div><div class="stat-sub" id="stFertSub"></div></div>
+          <div class="stat"><div class="stat-label"><i style="background:var(--ovu)"></i>Ovulation</div><div class="stat-val serif" id="stOvu">—</div><div class="stat-sub" id="stOvuSub"></div></div>
+        </div>
+
+        <div class="section-title">This week</div>
+        <div class="card"><div class="week" id="week"></div></div>
+
+        <div class="section-title">Today's log</div>
+        <div class="card">
+          <div class="row"><span class="muted" id="todaySummary">Nothing logged yet.</span><button class="link" id="editToday">Edit</button></div>
+          <div class="today-log" id="todayPills"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CALENDAR -->
+  <section class="screen" id="s-cal">
+    <div class="cal-wrap">
+      <div class="card">
+        <div class="cal-head">
+          <button class="icon-btn" id="prevM" aria-label="Previous month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+          <h2 class="cal-title serif" id="calTitle"></h2>
+          <button class="icon-btn" id="nextM" aria-label="Next month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+        <div class="legend">
+          <span><i class="sw p"></i>Period</span>
+          <span><i class="sw pp"></i>Predicted period</span>
+          <span><i class="sw f"></i>Fertile</span>
+          <span><i class="sw o"></i>Ovulation</span>
+        </div>
+      </div>
+      <div>
+        <div class="section-title">Tip</div>
+        <div class="note">Tap any day to log your period, symptoms, discharge or an ovulation test. A positive ovulation (LH) test fine-tunes your ovulation estimate for that cycle.</div>
+        <button class="btn btn-ghost btn-block" id="todayJump" style="margin-top:12px">Jump to today</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- INSIGHTS -->
+  <section class="screen" id="s-ins">
+    <div class="ins-grid">
+      <div>
+        <div class="big-stats">
+          <div class="stat"><div class="stat-label">Avg cycle</div><div class="stat-val serif" id="inCycle">—</div><div class="stat-sub" id="inCycleSub">days</div></div>
+          <div class="stat"><div class="stat-label">Avg period</div><div class="stat-val serif" id="inPeriod">—</div><div class="stat-sub">days</div></div>
+          <div class="stat"><div class="stat-label">Cycles logged</div><div class="stat-val serif" id="inCount">0</div><div class="stat-sub">complete</div></div>
+          <div class="stat"><div class="stat-label">Variation</div><div class="stat-val serif" id="inVar">—</div><div class="stat-sub" id="inVarSub">shortest–longest</div></div>
+        </div>
+        <div class="note" id="regNote" style="margin-top:12px"></div>
+      </div>
+      <div>
+        <div class="section-title" style="margin-top:0">Recent cycles</div>
+        <div class="card" id="cycleList"></div>
+        <div class="section-title">Most logged symptoms</div>
+        <div class="card" id="symList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section class="screen" id="s-set">
+    <div class="set-wrap">
+      <div class="section-title" style="margin-top:0">Your cycle</div>
+      <div class="card">
+        <div class="set-row">
+          <div><div class="set-label">Learn from my history</div><div class="set-help">Use your logged periods to work out averages.</div></div>
+          <label class="switch"><input type="checkbox" id="autoAvg"><span></span></label>
+        </div>
+        <div class="set-row">
+          <div><div class="set-label">Cycle length</div><div class="set-help" id="cycHelp">Used until you've logged 2 periods.</div></div>
+          <div class="stepper" data-set="cycleLen"><button data-d="-1" aria-label="Shorter">−</button><output id="setCycle">28</output><button data-d="1" aria-label="Longer">+</button></div>
+        </div>
+        <div class="set-row">
+          <div><div class="set-label">Period length</div><div class="set-help">Days of bleeding.</div></div>
+          <div class="stepper" data-set="periodLen"><button data-d="-1" aria-label="Fewer">−</button><output id="setPeriod">5</output><button data-d="1" aria-label="More">+</button></div>
+        </div>
+        <div class="set-row">
+          <div><div class="set-label">Luteal phase</div><div class="set-help">Days from ovulation to period. 14 is typical.</div></div>
+          <div class="stepper" data-set="luteal"><button data-d="-1" aria-label="Fewer">−</button><output id="setLuteal">14</output><button data-d="1" aria-label="More">+</button></div>
+        </div>
+      </div>
+
+      <div class="section-title">Your data</div>
+      <div class="card">
+        <div class="set-row">
+          <div><div class="set-label">Back up</div><div class="set-help">Save a file with all your logs.</div></div>
+          <button class="btn btn-ghost" id="exportBtn" style="height:40px">Export</button>
+        </div>
+        <div class="set-row">
+          <div><div class="set-label">Restore</div><div class="set-help">Load a backup file.</div></div>
+          <label class="btn btn-ghost" style="height:40px">Import<input type="file" id="importFile" accept="application/json,.json" hidden></label>
+        </div>
+        <div class="set-row">
+          <div><div class="set-label">Erase everything</div><div class="set-help">Deletes all logs on this device.</div></div>
+          <button class="btn btn-danger" id="eraseBtn" style="height:40px">Erase</button>
+        </div>
+      </div>
+
+      <div id="installBox" hidden>
+        <div class="section-title">Install</div>
+        <div class="card">
+          <div class="set-row">
+            <div><div class="set-label">Add Bloom to your home screen</div><div class="set-help" id="installHelp">Opens like an app and works offline.</div></div>
+            <button class="btn btn-primary" id="installBtn" style="height:40px">Install</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title">Good to know</div>
+      <div class="note">
+        Bloom estimates ovulation as <b>14 days before your next period</b> (or the day after a positive ovulation test) and marks the 5 days before plus the day after as your fertile window. Cycles vary, so treat these as estimates — <b>don't rely on Bloom for birth control</b>. Talk to a doctor if your cycles are very irregular, very painful, or you're trying to conceive for a year without success.
+      </div>
+      <p class="tiny" style="margin:16px 4px">Your data never leaves this device. <a class="link" href="privacy.html" style="font-size:12px">Privacy policy</a></p>
+    </div>
+  </section>
+</div>
+
+<nav class="tabbar" aria-label="Main">
+  <div class="tabbar-inner">
+    <button class="tab active" data-tab="today"><span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 1 8.5 8.5"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg></span>Today</button>
+    <button class="tab" data-tab="cal"><span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></span>Calendar</button>
+    <button class="tab" data-tab="ins"><span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 20V11M12 20V4M19 20v-6"/></svg></span>Insights</button>
+    <button class="tab" data-tab="set"><span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></span>Settings</button>
+  </div>
+</nav>
+</div>
+
+<!-- ============ DAY SHEET ============ -->
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="sheet-grab"></div>
+  <div class="sheet-head">
+    <div><h3 class="serif" id="sheetTitle" style="font-size:22px"></h3><div class="tiny" id="sheetPhase" style="margin-top:2px"></div></div>
+  </div>
+  <div class="sheet-body">
+    <div class="field-label">Period</div>
+    <div class="seg" id="flowSeg">
+      <button data-v="0">None</button><button data-v="1">Light</button><button data-v="2">Medium</button><button data-v="3">Heavy</button>
+    </div>
+    <div class="fill-hint" id="fillHint" hidden><span id="fillText"></span><button id="fillBtn">Mark them</button></div>
+
+    <div class="field-label">Ovulation test</div>
+    <div class="chips lh" id="lhChips"><button class="chip" data-v="neg">Negative</button><button class="chip" data-v="pos">Positive</button></div>
+
+    <div class="field-label">Symptoms</div>
+    <div class="chips" id="symChips"></div>
+
+    <div class="field-label">Discharge</div>
+    <div class="chips" id="disChips"></div>
+
+    <div class="field-label">Mood</div>
+    <div class="chips" id="moodChips"></div>
+
+    <div class="field-label">Basal temperature</div>
+    <div class="inline-input"><input class="input" id="tempIn" type="number" inputmode="decimal" step="0.01" min="34" max="40" placeholder="e.g. 36.55" style="max-width:160px"><span class="muted">°C</span></div>
+
+    <div class="field-label">Intimacy</div>
+    <div class="chips" id="sexChips"><button class="chip" data-v="protected">Protected</button><button class="chip" data-v="unprotected">Unprotected</button></div>
+
+    <div class="field-label">Notes</div>
+    <textarea class="input" id="noteIn" placeholder="Anything else to remember?"></textarea>
+  </div>
+  <div class="sheet-foot"><button class="btn btn-primary btn-block" id="sheetDone">Done</button></div>
+</div>
+
+<div class="dialog" id="dialog" role="alertdialog" aria-modal="true">
+  <h3 class="serif" id="dlgTitle"></h3>
+  <p id="dlgText"></p>
+  <div class="actions"><button class="btn btn-ghost" id="dlgNo">Cancel</button><button class="btn btn-danger" id="dlgYes">Erase</button></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* ================= helpers ================= */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const DAY = 86400000;
+const pad = n => String(n).padStart(2, "0");
+const fromKey = k => new Date(k + "T00:00:00Z");
+const toKey = d => d.toISOString().slice(0, 10);
+const addDays = (k, n) => toKey(new Date(fromKey(k).getTime() + n * DAY));
+const diffDays = (a, b) => Math.round((fromKey(b) - fromKey(a)) / DAY); // b - a
+const todayKey = () => { const n = new Date(); return `${n.getFullYear()}-${pad(n.getMonth() + 1)}-${pad(n.getDate())}`; };
+const fmt = (k, o = { month: "short", day: "numeric" }) => fromKey(k).toLocaleDateString("en-US", { ...o, timeZone: "UTC" });
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const mean = a => a.reduce((x, y) => x + y, 0) / a.length;
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const inDays = n => n === 0 ? "today" : n === 1 ? "tomorrow" : n === -1 ? "yesterday" : n > 0 ? `in ${n} days` : `${-n} days ago`;
+
+const SYMPTOMS = ["Cramps", "Headache", "Bloating", "Tender breasts", "Acne", "Fatigue", "Back pain", "Nausea", "Cravings", "Spotting", "Insomnia", "High libido"];
+const DISCHARGE = ["Dry", "Sticky", "Creamy", "Watery", "Egg-white"];
+const MOODS = ["Happy", "Calm", "Energetic", "Sensitive", "Irritable", "Anxious", "Sad"];
+const FLOW = ["None", "Light", "Medium", "Heavy"];
+
+/* ================= storage (IndexedDB → localStorage → memory) ================= */
+const DEFAULT = () => ({ v: 1, settings: { cycleLen: 28, periodLen: 5, luteal: 14, auto: true, onboarded: false }, logs: {} });
+let state = DEFAULT();
+const store = {
+  db: null,
+  async open() {
+    if (!("indexedDB" in window)) return null;
+    return new Promise(res => {
+      try {
+        const r = indexedDB.open("bloom", 1);
+        r.onupgradeneeded = () => r.result.createObjectStore("kv");
+        r.onsuccess = () => { this.db = r.result; res(this.db); };
+        r.onerror = () => res(null);
+        r.onblocked = () => res(null);
+      } catch (e) { res(null); }
+    });
+  },
+  async load() {
+    await this.open();
+    if (this.db) {
+      const v = await new Promise(res => {
+        try { const q = this.db.transaction("kv").objectStore("kv").get("state"); q.onsuccess = () => res(q.result); q.onerror = () => res(null); }
+        catch (e) { res(null); }
+      });
+      if (v) return v;
+    }
+    try { const s = localStorage.getItem("bloom-state"); if (s) return JSON.parse(s); } catch (e) {}
+    return null;
+  },
+  save() {
+    const data = JSON.parse(JSON.stringify(state));
+    if (this.db) { try { this.db.transaction("kv", "readwrite").objectStore("kv").put(data, "state"); } catch (e) {} }
+    try { localStorage.setItem("bloom-state", JSON.stringify(data)); } catch (e) {}
+  }
+};
+let saveTimer;
+const save = () => { clearTimeout(saveTimer); saveTimer = setTimeout(() => store.save(), 150); };
+
+function sanitize(s) {
+  const d = DEFAULT();
+  if (!s || typeof s !== "object") return d;
+  const st = Object.assign(d.settings, s.settings || {});
+  st.cycleLen = clamp(+st.cycleLen || 28, 18, 60);
+  st.periodLen = clamp(+st.periodLen || 5, 1, 12);
+  st.luteal = clamp(+st.luteal || 14, 9, 18);
+  const logs = {};
+  for (const [k, v] of Object.entries(s.logs || {})) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(k) || !v || typeof v !== "object") continue;
+    logs[k] = {
+      flow: clamp(+v.flow || 0, 0, 3),
+      sym: Array.isArray(v.sym) ? v.sym.filter(x => typeof x === "string") : [],
+      dis: typeof v.dis === "string" ? v.dis : "",
+      mood: Array.isArray(v.mood) ? v.mood.filter(x => typeof x === "string") : [],
+      lh: v.lh === "pos" || v.lh === "neg" ? v.lh : "",
+      temp: v.temp ? String(v.temp) : "",
+      sex: v.sex === "protected" || v.sex === "unprotected" ? v.sex : "",
+      note: typeof v.note === "string" ? v.note : ""
+    };
+  }
+  return { v: 1, settings: st, logs };
+}
+const getLog = k => state.logs[k] || { flow: 0, sym: [], dis: "", mood: [], lh: "", temp: "", sex: "", note: "" };
+const isEmpty = l => !l.flow && !l.sym.length && !l.dis && !l.mood.length && !l.lh && !l.temp && !l.sex && !l.note;
+function setLog(k, l) { if (isEmpty(l)) delete state.logs[k]; else state.logs[k] = l; save(); }
+
+/* ================= cycle model ================= */
+let M = null;
+function computeModel() {
+  const s = state.settings, T = todayKey();
+  const flowKeys = Object.keys(state.logs).filter(k => state.logs[k].flow > 0).sort();
+  const flowSet = new Set(flowKeys);
+  // a period starts on a bleeding day with no bleeding in the 2 days before it
+  const starts = flowKeys.filter(k => !flowSet.has(addDays(k, -1)) && !flowSet.has(addDays(k, -2)));
+  const runs = starts.map(st => { let end = st, d = st; while (flowSet.has(d) || flowSet.has(addDays(d, 1))) { if (flowSet.has(d)) end = d; d = addDays(d, 1); } return diffDays(st, end) + 1; });
+  const cycles = [];
+  for (let i = 0; i + 1 < starts.length; i++) { const L = diffDays(starts[i], starts[i + 1]); if (L >= 15 && L <= 60) cycles.push({ start: starts[i], len: L, period: runs[i] }); }
+  const recent = cycles.slice(-6).map(c => c.len);
+  const avgCycle = s.auto && recent.length ? Math.round(mean(recent)) : s.cycleLen;
+  // ignore an in-progress period (could still be ongoing) when averaging
+  const doneRuns = runs.filter((r, i) => i < runs.length - 1 || diffDays(starts[i], T) > r + 1).slice(-6);
+  const avgPeriod = s.auto && doneRuns.length ? clamp(Math.round(mean(doneRuns)), 1, 12) : s.periodLen;
+  const luteal = s.luteal;
+  const lhPos = Object.keys(state.logs).filter(k => state.logs[k].lh === "pos").sort();
+  const ovFor = (S, N) => {
+    const lh = lhPos.find(k => diffDays(S, k) >= 5 && diffDays(k, N) >= 5);
+    return lh ? { day: addDays(lh, 1), lh: true } : { day: addDays(N, -luteal), lh: false };
+  };
+
+  const map = {};
+  const mark = (k, t) => { const cur = map[k]; const pr = { period: 5, ovu: 4, fertile: 3, pred: 2 }; if (!cur || pr[t] > pr[cur]) map[k] = t; };
+  const markFertile = ov => { for (let i = -5; i <= 1; i++) mark(addDays(ov, i), i === 0 ? "ovu" : "fertile"); };
+  flowKeys.forEach(k => mark(k, "period"));
+  cycles.forEach(c => markFertile(ovFor(c.start, addDays(c.start, c.len)).day));
+
+  const last = starts.length ? starts[starts.length - 1] : null;
+  let cur = null;
+  if (last) {
+    const nextRaw = addDays(last, avgCycle);
+    const late = diffDays(nextRaw, T) > 0 && !flowSet.has(T) ? diffDays(nextRaw, T) : 0;
+    const next = late ? T : nextRaw;
+    const ov = ovFor(last, nextRaw);
+    // current cycle fertile window (only mark if in the future or recent)
+    markFertile(ov.day);
+    let S = next;
+    const future = [];
+    for (let k = 0; k < 12; k++) {
+      for (let i = 0; i < avgPeriod; i++) { const d = addDays(S, i); if (d >= T && !flowSet.has(d)) mark(d, "pred"); }
+      const N = addDays(S, avgCycle);
+      const o = addDays(N, -luteal);
+      markFertile(o);
+      future.push({ start: S, ov: o });
+      S = N;
+    }
+    const cycleDay = diffDays(last, T) + 1;
+    let nextOv = ov.day, nextFertStart = addDays(ov.day, -5), nextFertEnd = addDays(ov.day, 1);
+    if (T > nextFertEnd) { nextOv = future[0].ov; nextFertStart = addDays(nextOv, -5); nextFertEnd = addDays(nextOv, 1); }
+    cur = { last, next, late, ov, cycleDay, nextOv, nextFertStart, nextFertEnd, inPeriod: flowSet.has(T) || (cycleDay <= avgPeriod && runs[runs.length - 1] >= cycleDay - 1 && diffDays(T, addDays(last, avgPeriod - 1)) >= 0 && flowSet.has(addDays(T, -1))) };
+  }
+  M = { T, starts, runs, cycles, avgCycle, avgPeriod, luteal, map, cur, flowSet, histCount: recent.length };
+}
+function phaseOf(k) {
+  const t = M.map[k];
+  if (t === "period") return { key: "period", label: "Period", chance: "period", chanceLabel: "Period" };
+  if (t === "pred") return { key: "pred", label: "Predicted period", chance: "low", chanceLabel: "Low chance of pregnancy" };
+  if (t === "ovu") return { key: "ovu", label: "Estimated ovulation", chance: "peak", chanceLabel: "Peak fertility" };
+  if (t === "fertile") {
+    // within 2 days of the ovulation day → high
+    for (let i = 1; i <= 2; i++) if (M.map[addDays(k, i)] === "ovu") return { key: "fertile", label: "Fertile window", chance: "high", chanceLabel: "High chance of pregnancy" };
+    return { key: "fertile", label: "Fertile window", chance: "med", chanceLabel: "Medium chance of pregnancy" };
+  }
+  return { key: "", label: M.cur ? "Low fertility" : "", chance: "low", chanceLabel: "Low chance of pregnancy" };
+}
+
+/* ================= rendering: today ================= */
+function arcPath(cx, cy, r, a0, a1) {
+  const p = a => [cx + r * Math.cos(a), cy + r * Math.sin(a)];
+  const [x0, y0] = p(a0), [x1, y1] = p(a1);
+  return `M${x0.toFixed(2)} ${y0.toFixed(2)} A${r} ${r} 0 ${a1 - a0 > Math.PI ? 1 : 0} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`;
+}
+function renderDial() {
+  const svg = $("#dial"), c = M.cur;
+  const total = c ? Math.max(M.avgCycle, c.cycleDay) : M.avgCycle;
+  const cx = 150, cy = 150, r = 128, gap = total > 40 ? 0.012 : 0.02;
+  const css = getComputedStyle(document.documentElement);
+  const col = { period: css.getPropertyValue("--period"), pred: css.getPropertyValue("--period"), fertile: css.getPropertyValue("--fertile"), ovu: css.getPropertyValue("--ovu"), "": css.getPropertyValue("--line") };
+  let out = "";
+  for (let d = 1; d <= total; d++) {
+    const a0 = -Math.PI / 2 + (d - 1) / total * Math.PI * 2 + gap;
+    const a1 = -Math.PI / 2 + d / total * Math.PI * 2 - gap;
+    let t = "";
+    if (c) {
+      const k = addDays(c.last, d - 1);
+      t = M.map[k] || "";
+      if (!t && d <= M.avgPeriod && k > M.T) t = "pred";
+    }
+    const past = c && d < c.cycleDay;
+    const op = t === "" ? 1 : t === "pred" ? .35 : past ? .55 : 1;
+    out += `<path d="${arcPath(cx, cy, r, a0, a1)}" stroke="${col[t]}" stroke-opacity="${op}" stroke-width="${t === "ovu" ? 20 : 14}" stroke-linecap="butt" fill="none"/>`;
+  }
+  if (c) {
+    const a = -Math.PI / 2 + (c.cycleDay - .5) / total * Math.PI * 2;
+    const x = cx + r * Math.cos(a), y = cy + r * Math.sin(a);
+    out += `<circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="13" fill="${css.getPropertyValue("--surface")}" stroke="${css.getPropertyValue("--ink")}" stroke-width="3"/>`;
+  }
+  svg.innerHTML = out;
+}
+function renderToday() {
+  const T = M.T, c = M.cur;
+  $("#dateChip").textContent = fmt(T, { weekday: "short", month: "short", day: "numeric" });
+  renderDial();
+  const ph = phaseOf(T);
+  const chance = $("#chance");
+  chance.className = "chance " + ph.chance;
+  $("#chanceText").textContent = ph.chanceLabel;
+  const late = $("#lateBanner");
+  late.hidden = true;
+  if (!c) {
+    $("#dialKicker").textContent = "Welcome";
+    $("#dialMain").textContent = "Log a period";
+    $("#dialSub").textContent = "to see predictions";
+    chance.hidden = true;
+  } else {
+    chance.hidden = false;
+    $("#dialKicker").textContent = "Cycle day";
+    $("#dialMain").textContent = c.cycleDay;
+    let sub;
+    if (ph.key === "period") sub = "Period";
+    else if (ph.key === "ovu") sub = "Ovulation day";
+    else if (ph.key === "fertile") sub = `Ovulation ${inDays(diffDays(T, c.nextOv))}`;
+    else if (T < c.nextFertStart) sub = `Fertile window ${inDays(diffDays(T, c.nextFertStart))}`;
+    else sub = c.late ? "Period is late" : `Period ${inDays(diffDays(T, c.next))}`;
+    $("#dialSub").textContent = sub;
+    if (c.late) { late.hidden = false; late.textContent = `Your period is ${c.late} day${c.late > 1 ? "s" : ""} later than expected. Cycles can shift from stress, travel or illness — consider a pregnancy test if it's possible.`; }
+  }
+  // stats
+  if (c) {
+    $("#stNext").textContent = c.late ? "Late" : fmt(c.next);
+    $("#stNextSub").textContent = c.late ? `${c.late}d overdue` : inDays(diffDays(T, c.next));
+    const inFert = T >= c.nextFertStart && T <= c.nextFertEnd;
+    $("#stFert").textContent = inFert ? "Now" : fmt(c.nextFertStart);
+    $("#stFertSub").textContent = inFert ? `until ${fmt(c.nextFertEnd)}` : `${fmt(c.nextFertStart)}–${fmt(c.nextFertEnd, { day: "numeric" })}`;
+    $("#stOvu").textContent = fmt(c.nextOv);
+    $("#stOvuSub").textContent = inDays(diffDays(T, c.nextOv)) + (c.ov.lh && c.nextOv === c.ov.day ? " · LH test" : "");
+  } else {
+    ["#stNext", "#stFert", "#stOvu"].forEach(s => $(s).textContent = "—");
+    ["#stNextSub", "#stFertSub", "#stOvuSub"].forEach(s => $(s).textContent = "");
+  }
+  // week strip
+  const dow = fromKey(T).getUTCDay();
+  let w = "";
+  for (let i = 0; i < 7; i++) {
+    const k = addDays(T, i - dow);
+    const t = M.map[k] || "";
+    w += `<button data-day="${k}" style="display:block"><div class="wd">${fmt(k, { weekday: "narrow" })}</div><div class="wn day ${t === "pred" ? "pred" : t}${k === T ? " today" : ""}" style="aspect-ratio:auto">${fromKey(k).getUTCDate()}</div></button>`;
+  }
+  $("#week").innerHTML = w;
+  // buttons
+  const todayFlow = getLog(T).flow;
+  const pb = $("#periodBtn");
+  if (todayFlow) { pb.textContent = "Period ended"; pb.className = "btn btn-ghost"; }
+  else { pb.textContent = "Period started"; pb.className = "btn btn-period"; }
+  // today pills
+  const l = getLog(T), pills = [];
+  if (l.flow) pills.push(`<span class="pill p">${FLOW[l.flow]} flow</span>`);
+  if (l.lh) pills.push(`<span class="pill f">LH ${l.lh === "pos" ? "positive" : "negative"}</span>`);
+  l.sym.forEach(s => pills.push(`<span class="pill">${esc(s)}</span>`));
+  if (l.dis) pills.push(`<span class="pill">${esc(l.dis)}</span>`);
+  l.mood.forEach(s => pills.push(`<span class="pill">${esc(s)}</span>`));
+  if (l.temp) pills.push(`<span class="pill">${esc(l.temp)}°C</span>`);
+  if (l.sex) pills.push(`<span class="pill">Intimacy</span>`);
+  $("#todayPills").innerHTML = pills.join("");
+  $("#todaySummary").textContent = pills.length ? (l.note ? "“" + l.note.slice(0, 60) + (l.note.length > 60 ? "…" : "") + "”" : "Logged today") : "Nothing logged yet.";
+}
+
+/* ================= rendering: calendar ================= */
+let calMonth = null; // "YYYY-MM"
+function renderCalendar() {
+  if (!calMonth) calMonth = M.T.slice(0, 7);
+  const [y, m] = calMonth.split("-").map(Number);
+  const first = `${y}-${pad(m)}-01`;
+  const days = new Date(Date.UTC(y, m, 0)).getUTCDate();
+  $("#calTitle").textContent = fromKey(first).toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
+  let h = ["S", "M", "T", "W", "T", "F", "S"].map(d => `<div class="cal-dow">${d}</div>`).join("");
+  const lead = fromKey(first).getUTCDay();
+  for (let i = 0; i < lead; i++) h += `<div class="day out"></div>`;
+  for (let d = 1; d <= days; d++) {
+    const k = `${y}-${pad(m)}-${pad(d)}`;
+    const t = M.map[k] || "";
+    const l = state.logs[k];
+    const hasLog = l && (l.sym.length || l.mood.length || l.dis || l.lh || l.temp || l.sex || l.note);
+    h += `<button class="day ${t}${k === M.T ? " today" : ""}" data-day="${k}" aria-label="${fmt(k, { weekday: "long", month: "long", day: "numeric" })}">${d}${hasLog ? '<i class="mark"></i>' : ""}</button>`;
+  }
+  $("#calGrid").innerHTML = h;
+}
+
+/* ================= rendering: insights ================= */
+function renderInsights() {
+  const cyc = M.cycles.slice(-6);
+  $("#inCycle").textContent = M.avgCycle;
+  $("#inCycleSub").textContent = M.histCount && state.settings.auto ? `days · from ${M.histCount} cycle${M.histCount > 1 ? "s" : ""}` : "days · from settings";
+  $("#inPeriod").textContent = M.avgPeriod;
+  $("#inCount").textContent = M.cycles.length;
+  if (cyc.length >= 2) {
+    const lens = cyc.map(c => c.len), lo = Math.min(...lens), hi = Math.max(...lens);
+    $("#inVar").textContent = hi - lo + "d";
+    $("#inVarSub").textContent = `${lo}–${hi} days`;
+    $("#regNote").innerHTML = hi - lo <= 7
+      ? "<b>Your cycles look regular.</b> Predictions should be fairly reliable."
+      : "<b>Your cycles vary by more than a week.</b> Predictions are less reliable — ovulation tests or temperature tracking can help.";
+  } else {
+    $("#inVar").textContent = "—"; $("#inVarSub").textContent = "shortest–longest";
+    $("#regNote").innerHTML = "Log at least <b>3 periods</b> and Bloom will learn your own averages.";
+  }
+  const maxLen = Math.max(35, ...cyc.map(c => c.len));
+  $("#cycleList").innerHTML = cyc.length
+    ? cyc.slice().reverse().map(c => `<div class="cycle-row"><span class="muted">${fmt(c.start)}</span><div class="bar" title="${c.period} period days of ${c.len}"><b style="width:${c.period / maxLen * 100}%"></b><em style="width:${(c.len - c.period) / maxLen * 100}%"></em></div><b style="text-align:right">${c.len}d</b></div>`).join("")
+    : `<div class="empty">Complete cycles will show up here once you've logged two periods.</div>`;
+  const counts = {};
+  Object.values(state.logs).forEach(l => l.sym.forEach(s => counts[s] = (counts[s] || 0) + 1));
+  const top = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const tmax = top.length ? top[0][1] : 1;
+  $("#symList").innerHTML = top.length
+    ? top.map(([s, n]) => `<div class="sym-row"><span style="width:110px">${esc(s)}</span><div class="bar"><b style="width:${n / tmax * 100}%"></b></div><span class="muted" style="width:28px;text-align:right">${n}</span></div>`).join("")
+    : `<div class="empty">Symptoms you log will be summarised here.</div>`;
+}
+
+/* ================= rendering: settings ================= */
+function renderSettings() {
+  const s = state.settings;
+  $("#autoAvg").checked = s.auto;
+  $("#setCycle").textContent = s.cycleLen;
+  $("#setPeriod").textContent = s.periodLen;
+  $("#setLuteal").textContent = s.luteal;
+  $("#cycHelp").textContent = s.auto ? (M.histCount ? `Your history says ${M.avgCycle} days — this is the fallback.` : "Used until you've logged 2 periods.") : "Always used for predictions.";
+}
+function renderAll() { computeModel(); renderToday(); renderCalendar(); renderInsights(); renderSettings(); }
+
+/* ================= day sheet ================= */
+let sheetDay = null, draft = null;
+function chipHTML(list, sel) { return list.map(v => `<button class="chip${sel.includes(v) ? " on" : ""}" data-v="${esc(v)}">${esc(v)}</button>`).join(""); }
+function openSheet(k) {
+  sheetDay = k; draft = JSON.parse(JSON.stringify(getLog(k)));
+  $("#sheetTitle").textContent = fmt(k, { weekday: "long", month: "long", day: "numeric" });
+  const ph = phaseOf(k);
+  $("#sheetPhase").textContent = (k === M.T ? "Today" : inDays(diffDays(M.T, k)).replace(/^./, c => c.toUpperCase())) + (ph.label ? " · " + ph.label : "") + (M.cur && k >= M.cur.last ? ` · cycle day ${diffDays(M.cur.last, k) + 1}` : "");
+  paintSheet();
+  $("#scrim").classList.add("open"); $("#sheet").classList.add("open");
+  $(".sheet-body").scrollTop = 0;
+}
+function paintSheet() {
+  $$("#flowSeg button").forEach(b => b.classList.toggle("on", +b.dataset.v === draft.flow && draft.flow > 0 || (+b.dataset.v === 0 && !draft.flow)));
+  $$("#lhChips .chip").forEach(b => b.classList.toggle("on", draft.lh === b.dataset.v));
+  $("#symChips").innerHTML = chipHTML(SYMPTOMS, draft.sym);
+  $("#disChips").innerHTML = chipHTML(DISCHARGE, draft.dis ? [draft.dis] : []);
+  $("#moodChips").innerHTML = chipHTML(MOODS, draft.mood);
+  $$("#sexChips .chip").forEach(b => b.classList.toggle("on", draft.sex === b.dataset.v));
+  $("#tempIn").value = draft.temp;
+  $("#noteIn").value = draft.note;
+  updateFillHint();
+}
+function fillCandidates() {
+  if (!draft.flow) return [];
+  const prevFlow = getLog(addDays(sheetDay, -1)).flow || getLog(addDays(sheetDay, -2)).flow;
+  if (prevFlow) return [];
+  const out = [];
+  for (let i = 1; i < M.avgPeriod; i++) { const d = addDays(sheetDay, i); if (d > M.T) break; if (getLog(d).flow) return []; out.push(d); }
+  return out;
+}
+function updateFillHint() {
+  const c = fillCandidates();
+  $("#fillHint").hidden = !c.length;
+  if (c.length) $("#fillText").textContent = `Also mark the next ${c.length} day${c.length > 1 ? "s" : ""} as period?`;
+}
+function commitDraft() { if (sheetDay) { setLog(sheetDay, draft); renderAll(); } }
+function closeSheet() {
+  commitDraft();
+  $("#scrim").classList.remove("open"); $("#sheet").classList.remove("open");
+  sheetDay = null;
+}
+$("#flowSeg").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; draft.flow = +b.dataset.v; paintSheet(); });
+$("#fillBtn").addEventListener("click", () => {
+  const c = fillCandidates();
+  c.forEach(d => { const l = getLog(d); l.flow = 2; setLog(d, l); });
+  $("#fillHint").hidden = true; toast(`Marked ${c.length} more day${c.length > 1 ? "s" : ""}`);
+  commitDraft();
+});
+function toggleIn(arr, v) { const i = arr.indexOf(v); i >= 0 ? arr.splice(i, 1) : arr.push(v); }
+$("#symChips").addEventListener("click", e => { const b = e.target.closest(".chip"); if (!b) return; toggleIn(draft.sym, b.dataset.v); b.classList.toggle("on"); });
+$("#moodChips").addEventListener("click", e => { const b = e.target.closest(".chip"); if (!b) return; toggleIn(draft.mood, b.dataset.v); b.classList.toggle("on"); });
+$("#disChips").addEventListener("click", e => { const b = e.target.closest(".chip"); if (!b) return; draft.dis = draft.dis === b.dataset.v ? "" : b.dataset.v; paintSheet(); });
+$("#lhChips").addEventListener("click", e => { const b = e.target.closest(".chip"); if (!b) return; draft.lh = draft.lh === b.dataset.v ? "" : b.dataset.v; paintSheet(); });
+$("#sexChips").addEventListener("click", e => { const b = e.target.closest(".chip"); if (!b) return; draft.sex = draft.sex === b.dataset.v ? "" : b.dataset.v; paintSheet(); });
+$("#tempIn").addEventListener("input", e => { const v = e.target.value.trim(); draft.temp = v && +v >= 30 && +v <= 45 ? v : ""; });
+$("#noteIn").addEventListener("input", e => { draft.note = e.target.value.slice(0, 1000); });
+$("#sheetDone").addEventListener("click", closeSheet);
+$("#scrim").addEventListener("click", () => { closeSheet(); closeDialog(); });
+
+/* ================= dialog + toast ================= */
+let dlgYes = null;
+function openDialog(title, text, yesLabel, onYes) {
+  $("#dlgTitle").textContent = title; $("#dlgText").textContent = text; $("#dlgYes").textContent = yesLabel; dlgYes = onYes;
+  $("#scrim").classList.add("open"); $("#dialog").classList.add("open");
+}
+function closeDialog() { $("#dialog").classList.remove("open"); if (!$("#sheet").classList.contains("open")) $("#scrim").classList.remove("open"); }
+$("#dlgNo").addEventListener("click", closeDialog);
+$("#dlgYes").addEventListener("click", () => { const f = dlgYes; closeDialog(); f && f(); });
+let toastT;
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 2200); }
+
+/* ================= navigation ================= */
+const TABS = ["today", "cal", "ins", "set"];
+function go(tab) {
+  if (!TABS.includes(tab)) tab = "today";
+  $$(".tab").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
+  $$(".screen").forEach(s => s.classList.toggle("active", s.id === "s-" + tab));
+  window.scrollTo(0, 0);
+  try { history.replaceState(null, "", tab === "today" ? location.pathname : "#" + tab); } catch (e) {}
+}
+$$(".tab").forEach(b => b.addEventListener("click", () => go(b.dataset.tab)));
+document.addEventListener("click", e => { const d = e.target.closest("[data-day]"); if (d) openSheet(d.dataset.day); });
+$("#prevM").addEventListener("click", () => { const [y, m] = calMonth.split("-").map(Number); const d = new Date(Date.UTC(y, m - 2, 1)); calMonth = toKey(d).slice(0, 7); renderCalendar(); });
+$("#nextM").addEventListener("click", () => { const [y, m] = calMonth.split("-").map(Number); const d = new Date(Date.UTC(y, m, 1)); calMonth = toKey(d).slice(0, 7); renderCalendar(); });
+$("#todayJump").addEventListener("click", () => { calMonth = M.T.slice(0, 7); renderCalendar(); });
+
+/* ================= today actions ================= */
+$("#periodBtn").addEventListener("click", () => {
+  const T = M.T, l = getLog(T);
+  if (l.flow) {
+    // period ended: clear today's flow if it's the only mark today, otherwise just note it's over
+    l.flow = 0; setLog(T, l); renderAll(); toast("Period marked as ended");
+  } else {
+    l.flow = 2; setLog(T, l); renderAll(); openSheet(T);
+  }
+});
+$("#logTodayBtn").addEventListener("click", () => openSheet(M.T));
+$("#editToday").addEventListener("click", () => openSheet(M.T));
+
+/* ================= settings ================= */
+const LIMITS = { cycleLen: [18, 60], periodLen: [1, 12], luteal: [9, 18] };
+$$("[data-set]").forEach(st => st.addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  const key = st.dataset.set, [lo, hi] = LIMITS[key];
+  state.settings[key] = clamp(state.settings[key] + +b.dataset.d, lo, hi);
+  save(); renderAll();
+}));
+$("#autoAvg").addEventListener("change", e => { state.settings.auto = e.target.checked; save(); renderAll(); });
+$("#exportBtn").addEventListener("click", async () => {
+  const data = JSON.stringify(state, null, 2);
+  const name = `bloom-backup-${M.T}.json`;
+  try {
+    const file = new File([data], name, { type: "application/json" });
+    if (navigator.canShare && navigator.canShare({ files: [file] }) && /Android|iPhone|iPad/i.test(navigator.userAgent)) { await navigator.share({ files: [file], title: "Bloom backup" }); return; }
+  } catch (e) { if (e && e.name === "AbortError") return; }
+  try {
+    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([data], { type: "application/json" })); a.download = name;
+    document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    toast("Backup saved");
+  } catch (e) {
+    try { await navigator.clipboard.writeText(data); toast("Backup copied to clipboard"); } catch (e2) { toast("Couldn't export here"); }
+  }
+});
+$("#importFile").addEventListener("change", async e => {
+  const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+  try {
+    const s = sanitize(JSON.parse(await f.text()));
+    s.settings.onboarded = true;
+    openDialog("Restore backup?", `This replaces what's on this device with ${Object.keys(s.logs).length} logged days from the file.`, "Restore", () => { state = s; save(); renderAll(); toast("Backup restored"); });
+    $("#dlgYes").className = "btn btn-primary";
+  } catch (err) { toast("That file isn't a Bloom backup"); }
+});
+$("#eraseBtn").addEventListener("click", () => {
+  openDialog("Erase everything?", "All your logs and settings on this device will be deleted. This can't be undone.", "Erase", () => {
+    state = DEFAULT(); store.save(); showOnboarding();
+  });
+  $("#dlgYes").className = "btn btn-danger";
+});
+
+/* ================= onboarding ================= */
+function showOnboarding() {
+  $("#main").hidden = true; $("#onboard").hidden = false;
+  const T = todayKey();
+  $("#obDate").max = T; $("#obDate").value = addDays(T, -10);
+}
+function showMain() { $("#onboard").hidden = true; $("#main").hidden = false; renderAll(); go((location.hash || "").slice(1)); }
+const ob = { period: 5, cycle: 28 };
+$$("[data-ob]").forEach(st => st.addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  const k = st.dataset.ob;
+  ob[k] = clamp(ob[k] + +b.dataset.d, k === "period" ? 1 : 18, k === "period" ? 12 : 60);
+  $(k === "period" ? "#obPeriod" : "#obCycle").textContent = ob[k];
+  if (k === "cycle") $("#obUnsure").checked = false;
+}));
+$("#obUnsure").addEventListener("change", e => { if (e.target.checked) { ob.cycle = 28; $("#obCycle").textContent = 28; } });
+$("#obStart").addEventListener("click", () => {
+  const T = todayKey();
+  let d = $("#obDate").value;
+  if (!d || !/^\d{4}-\d{2}-\d{2}$/.test(d)) { toast("Pick the date your last period started"); return; }
+  if (d > T) d = T;
+  state.settings.cycleLen = ob.cycle; state.settings.periodLen = ob.period; state.settings.onboarded = true;
+  for (let i = 0; i < ob.period; i++) { const k = addDays(d, i); if (k > T) break; const l = getLog(k); l.flow = i === 0 || i === ob.period - 1 ? (i === 0 ? 2 : 1) : (i === 1 ? 3 : 2); state.logs[k] = l; }
+  save(); showMain();
+});
+
+/* ================= install (PWA) ================= */
+const NATIVE = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+const STANDALONE = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone;
+const IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+let installEvt = null;
+const SHARE_SVG = '<svg class="share-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/></svg>';
+const bannerDismissed = () => { try { return localStorage.getItem("bloom-ib") === "1"; } catch (e) { return false; } };
+const WEB = /^https?:$/.test(location.protocol) && !/claude\.(ai|site)|claudeusercontent/.test(location.hostname);
+function showInstall(mode) {
+  if (NATIVE || STANDALONE || !WEB) return;
+  $("#installBox").hidden = false;
+  if (!bannerDismissed()) $("#installBanner").hidden = false;
+  if (mode === "ios") {
+    const t = `Tap ${SHARE_SVG} <b>Share</b> in Safari, then <b>Add to Home Screen</b>.`;
+    $("#installHelp").innerHTML = t; $("#ibHelp").innerHTML = t;
+    $("#installBtn").hidden = true; $("#ibInstall").hidden = true;
+  } else {
+    $("#installBtn").hidden = false; $("#ibInstall").hidden = false;
+  }
+}
+async function doInstall() {
+  if (!installEvt) return;
+  installEvt.prompt();
+  try { await installEvt.userChoice; } catch (e) {}
+  installEvt = null; $("#installBox").hidden = true; $("#installBanner").hidden = true;
+}
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvt = e; showInstall("prompt"); });
+window.addEventListener("appinstalled", () => { $("#installBox").hidden = true; $("#installBanner").hidden = true; toast("Bloom added to your home screen"); });
+if (IOS) showInstall("ios");
+$("#installBtn").addEventListener("click", doInstall);
+$("#ibInstall").addEventListener("click", doInstall);
+$("#ibClose").addEventListener("click", () => { $("#installBanner").hidden = true; try { localStorage.setItem("bloom-ib", "1"); } catch (e) {} });
+if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol) && !NATIVE && !/claude\.(ai|site)|claudeusercontent/.test(location.hostname)) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+}
+
+/* ================= keyboard / lifecycle ================= */
+document.addEventListener("keydown", e => { if (e.key === "Escape") { if ($("#dialog").classList.contains("open")) closeDialog(); else if (sheetDay) closeSheet(); } });
+// refresh when the date changes while the app is open
+document.addEventListener("visibilitychange", () => { if (!document.hidden && M && todayKey() !== M.T && state.settings.onboarded) renderAll(); });
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", () => M && renderDial());
+
+/* ================= boot ================= */
+(async () => {
+  const saved = await store.load();
+  state = sanitize(saved);
+  if (state.settings.onboarded) showMain(); else showOnboarding();
+})();
+</script>
+</body>
+</html>
