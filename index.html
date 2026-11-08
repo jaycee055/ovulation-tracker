@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Bloom — Ovulation Tracker</title>
 <meta name="description" content="A private, simple ovulation and period tracker. Your data stays on your device.">
-<meta name="theme-color" content="#FBF6F3" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#17131A" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#FFE6EF">
+<meta name="color-scheme" content="light only">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
@@ -16,316 +16,379 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#FBF6F3; --surface:#FFFFFF; --surface-2:#F5EEEA; --line:#EDE3DE;
-  --ink:#2A2230; --ink-2:#6E6474; --ink-3:#A39AA6;
-  --period:#E0526F; --period-soft:#FBE3E8; --period-ink:#B23452;
-  --fertile:#33A396; --fertile-soft:#DDF2EF; --fertile-ink:#1D7469;
-  --ovu:#6A4FD0; --ovu-soft:#ECE7FB;
-  --accent:#2A2230; --accent-ink:#FFFFFF;
-  --shadow:0 1px 2px rgba(42,34,48,.04),0 8px 24px rgba(42,34,48,.06);
-  --r:20px; --r-sm:12px;
+  --bg-top:#FFE3EE; --bg-mid:#FFF4F8; --bg-bot:#FFFFFF;
+  --surface:#FFFFFF; --surface-2:#FFF3F7; --line:#F7E6EC;
+  --ink:#2E2433; --ink-2:#7A6F80; --ink-3:#B3A8B6;
+  --pink:#FF5C8A; --pink-soft:#FFE3EB; --pink-ink:#E23D6D;
+  --yellow:#FFC53D; --yellow-soft:#FFF4D6; --yellow-ink:#B98300;
+  --green:#7EDDB0; --green-strong:#22B57A; --green-soft:#DFF7EC; --green-ink:#178A5C;
+  --blue:#78B4FA; --blue-soft:#E4F0FF; --blue-ink:#3A7FD6;
+  --violet:#A98BFF; --violet-soft:#EFE9FF;
+  --shadow:0 2px 6px rgba(255,92,138,.05),0 14px 34px rgba(255,92,138,.09);
+  --shadow-sm:0 2px 10px rgba(255,92,138,.08);
+  --r:24px; --r-sm:14px;
   --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
-  color-scheme:light;
-}
-@media (prefers-color-scheme:dark){
-  :root{
-    --bg:#17131A; --surface:#211B25; --surface-2:#2A232F; --line:#352D3B;
-    --ink:#F4EEF6; --ink-2:#B9AFBF; --ink-3:#7E7484;
-    --period:#F0657F; --period-soft:#4A2330; --period-ink:#FF9AAD;
-    --fertile:#4CC2B3; --fertile-soft:#173B37; --fertile-ink:#7FDCCF;
-    --ovu:#9A84F5; --ovu-soft:#2F2752;
-    --accent:#F4EEF6; --accent-ink:#17131A;
-    --shadow:0 1px 2px rgba(0,0,0,.2),0 8px 24px rgba(0,0,0,.25);
-    color-scheme:dark;
-  }
+  color-scheme:light only;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;background:var(--bg);color:var(--ink)}
-body{font-family:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased;min-height:100vh;min-height:100dvh}
-button,input,textarea,select{font:inherit;color:inherit}
+html{background:var(--bg-bot)}
+body{margin:0;color:var(--ink);font-family:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased;min-height:100vh;min-height:100dvh;
+  background:linear-gradient(180deg,var(--bg-top) 0%,var(--bg-mid) 340px,var(--bg-bot) 720px) no-repeat,var(--bg-bot);overscroll-behavior-y:none}
+button,input,textarea{font:inherit;color:inherit}
 button{cursor:pointer;border:0;background:none;padding:0}
-h1,h2,h3{margin:0;font-weight:600}
-.serif{font-family:"Fraunces",Georgia,serif;font-optical-sizing:auto;letter-spacing:-.01em}
+h1,h2,h3{margin:0}
 .muted{color:var(--ink-2)}
 .tiny{font-size:12px;color:var(--ink-3)}
 [hidden]{display:none!important}
 
 /* ---------- layout ---------- */
-.app{max-width:520px;margin:0 auto;padding:calc(var(--safe-t) + 18px) 18px calc(var(--safe-b) + 96px)}
-.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
-.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px}
-.brand-mark{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:var(--period-soft)}
-.date-chip{font-size:13px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);padding:6px 12px;border-radius:99px}
+.app{max-width:500px;margin:0 auto;padding:calc(var(--safe-t) + 16px) max(16px,env(safe-area-inset-right)) calc(var(--safe-b) + 110px) max(16px,env(safe-area-inset-left))}
 .screen{display:none;animation:fade .25s ease}
 .screen.active{display:block}
-@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
-.section-title{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);margin:26px 4px 10px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:18px}
-.stack>*+*{margin-top:12px}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.card{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:18px}
+.sec{display:flex;align-items:center;justify-content:space-between;margin:24px 4px 10px}
+.sec h2{font-size:18px;font-weight:800;letter-spacing:-.01em}
+.sec .link{font-size:13px;font-weight:600;color:var(--pink-ink)}
+.page-title{font-size:24px;font-weight:800;letter-spacing:-.02em;margin:4px 4px 16px}
 
-/* ---------- tab bar ---------- */
-.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--line);padding:8px 10px calc(var(--safe-b) + 8px)}
-.tabbar-inner{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
-.tab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;font-size:11.5px;font-weight:600;color:var(--ink-3);border-radius:12px;transition:color .2s}
-.tab svg{width:22px;height:22px}
-.tab.active{color:var(--ink)}
-.tab.active .tab-ico{background:var(--surface-2)}
-.tab-ico{padding:3px 14px;border-radius:99px;display:grid;place-items:center;transition:background .2s}
+/* ---------- header ---------- */
+.hello{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 4px 16px}
+.hello h1{font-size:22px;font-weight:800;letter-spacing:-.02em}
+.hello p{margin:2px 0 0;font-size:13.5px;color:var(--ink-2)}
+.avatar{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#FFD3E0,#FFE9C7);display:grid;place-items:center;box-shadow:0 0 0 3px #fff,var(--shadow-sm);font-weight:800;font-size:18px;color:var(--pink-ink);flex-shrink:0}
 
-/* ---------- today ---------- */
-.hero{padding:22px 18px 20px;text-align:center}
-.dial-wrap{position:relative;width:min(300px,78vw);aspect-ratio:1;margin:0 auto}
-.dial-wrap svg{width:100%;height:100%;display:block;overflow:visible}
-.dial-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 22%}
-.dial-kicker{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
-.dial-main{font-size:40px;line-height:1.05;margin:4px 0 6px}
-.dial-sub{font-size:13.5px;color:var(--ink-2)}
-.chance{display:inline-flex;align-items:center;gap:6px;margin-top:16px;padding:7px 14px;border-radius:99px;font-size:13px;font-weight:600;background:var(--surface-2)}
-.chance .dot{width:8px;height:8px;border-radius:50%;background:var(--ink-3)}
-.chance.low .dot{background:var(--ink-3)}
-.chance.med{background:var(--fertile-soft);color:var(--fertile-ink)} .chance.med .dot{background:var(--fertile)}
-.chance.high{background:var(--fertile-soft);color:var(--fertile-ink)} .chance.high .dot{background:var(--fertile);box-shadow:0 0 0 3px color-mix(in srgb,var(--fertile) 30%,transparent)}
-.chance.peak{background:var(--ovu-soft);color:var(--ovu)} .chance.peak .dot{background:var(--ovu);box-shadow:0 0 0 3px color-mix(in srgb,var(--ovu) 30%,transparent)}
-.chance.period{background:var(--period-soft);color:var(--period-ink)} .chance.period .dot{background:var(--period)}
-.late-banner{margin-top:14px;font-size:13px;color:var(--period-ink);background:var(--period-soft);border-radius:var(--r-sm);padding:10px 12px;text-align:left}
-.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 18px;border-radius:14px;font-weight:600;font-size:14.5px;transition:transform .1s,opacity .2s}
-.btn:active{transform:scale(.98)}
-.btn-primary{background:var(--accent);color:var(--accent-ink)}
-.btn-period{background:var(--period);color:#fff}
-.btn-ghost{background:var(--surface-2);color:var(--ink)}
-.btn-danger{background:var(--period-soft);color:var(--period-ink)}
-.btn-block{width:100%}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.stat{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 12px;box-shadow:var(--shadow)}
-.stat-label{font-size:11.5px;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:6px}
-.stat-label i{width:8px;height:8px;border-radius:50%;display:inline-block}
-.stat-val{font-size:19px;margin-top:6px;line-height:1.1}
-.stat-sub{font-size:12px;color:var(--ink-2);margin-top:3px}
+/* ---------- week strip ---------- */
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:12px 8px}
+.wk{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0 10px;border-radius:18px;position:relative}
+.wk .wd{font-size:11.5px;font-weight:600;color:var(--ink-3)}
+.wk .wn{font-size:15px;font-weight:700}
+.wk .wdot{width:6px;height:6px;border-radius:50%;background:transparent}
+.wk.period .wdot{background:var(--pink)} .wk.pred .wdot{background:var(--pink);opacity:.4}
+.wk.fertile .wdot{background:var(--green)} .wk.ovu .wdot{background:var(--green-strong)}
+.wk.today{background:linear-gradient(180deg,#FF7AA0,var(--pink));box-shadow:0 8px 18px rgba(255,92,138,.35)}
+.wk.today .wd,.wk.today .wn{color:#fff}
+.wk.today .wdot{background:#fff!important;opacity:1}
+.wk.today .wd{font-size:10px;text-transform:none}
+
+/* ---------- dial ---------- */
+.hero{padding:22px 16px 18px;text-align:center;margin-top:14px}
+.dial-wrap{position:relative;width:min(290px,80vw);aspect-ratio:1;margin:0 auto}
+.dial-wrap #dial{width:100%;height:100%;display:block;overflow:visible}
+.dial-center{position:absolute;inset:16%;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:hidden}
+.dial-main{font-size:34px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.dial-sub{font-size:12.5px;font-weight:600;color:var(--ink-2);margin-top:4px}
+.dial-wrap .face{width:92px;height:92px;flex-shrink:0;margin-top:10px;transition:transform .3s;cursor:pointer}
+.face:active{transform:scale(.95)}
+.log-pill{display:inline-flex;align-items:center;gap:8px;margin-top:16px;height:40px;padding:0 18px;border-radius:99px;background:var(--pink-soft);color:var(--pink-ink);font-weight:700;font-size:14px}
+.log-pill i{width:9px;height:9px;border-radius:50%;background:var(--pink);box-shadow:0 0 0 3px rgba(255,92,138,.2)}
+.log-pill.on{background:var(--surface-2);color:var(--ink-2)} .log-pill.on i{background:var(--ink-3);box-shadow:none}
+.phase-legend{display:flex;justify-content:center;flex-wrap:wrap;gap:6px 12px;margin-top:14px;font-size:11.5px;color:var(--ink-2);font-weight:500}
+.phase-legend span{display:inline-flex;align-items:center;gap:5px}
+.phase-legend i{width:8px;height:8px;border-radius:50%}
+.late-banner{margin-top:14px;font-size:13px;color:var(--pink-ink);background:var(--pink-soft);border-radius:var(--r-sm);padding:11px 13px;text-align:left}
+
+/* ---------- insight rows ---------- */
+.ins-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.ins-row:first-child{border-top:0;padding-top:2px}
+.ins-row:last-child{padding-bottom:2px}
+.ins-ico{width:40px;height:40px;border-radius:14px;display:grid;place-items:center;flex-shrink:0;font-size:18px}
+.ins-body{flex:1;min-width:0}
+.ins-title{font-weight:700;font-size:14.5px}
+.ins-sub{font-size:12.5px;color:var(--ink-3);margin-top:1px}
+.ins-val{font-weight:800;font-size:14.5px;text-align:right;white-space:nowrap}
+.lvl-low{color:var(--blue-ink)} .lvl-med{color:var(--yellow-ink)} .lvl-high{color:var(--pink-ink)} .lvl-peak{color:var(--pink-ink)} .lvl-period{color:var(--pink-ink)}
+
 .today-log{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-.pill{font-size:12.5px;padding:5px 10px;border-radius:99px;background:var(--surface-2);color:var(--ink-2);font-weight:500}
-.pill.p{background:var(--period-soft);color:var(--period-ink)}
-.pill.f{background:var(--fertile-soft);color:var(--fertile-ink)}
+.pill{font-size:12.5px;padding:6px 11px;border-radius:99px;background:var(--surface-2);color:var(--ink-2);font-weight:600}
+.pill.p{background:var(--pink-soft);color:var(--pink-ink)}
+.pill.f{background:var(--green-soft);color:var(--green-ink)}
 .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.link{color:var(--ink);font-weight:600;font-size:13.5px;text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line)}
-.week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
-.week .wd{font-size:11px;font-weight:600;color:var(--ink-3)}
-.week .wn{margin:6px auto 0;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:13.5px;font-weight:600;position:relative}
+.link{color:var(--pink-ink);font-weight:700;font-size:13.5px}
 
-.install-banner{position:relative;display:flex;align-items:center;gap:12px;margin-top:18px;padding:14px 38px 14px 14px;border-radius:var(--r);background:var(--ovu-soft);color:var(--ink)}
-.today-grid>div:last-child>.install-banner{margin-top:0}
-.ib-ico{width:42px;height:42px;flex-shrink:0;border-radius:12px;display:grid;place-items:center;background:var(--surface);color:var(--ovu)}
-.ib-text{flex:1;display:flex;flex-direction:column;font-size:13px;color:var(--ink-2);line-height:1.35}
+/* install banner */
+.install-banner{position:relative;display:flex;align-items:center;gap:12px;margin-top:14px;padding:14px 38px 14px 14px;border-radius:var(--r);background:linear-gradient(135deg,#FFE7EF,#F1EAFF);box-shadow:var(--shadow-sm)}
+.ib-ico{width:44px;height:44px;flex-shrink:0;border-radius:14px;overflow:hidden;background:#fff}
+.ib-ico img{width:100%;height:100%;display:block}
+.ib-text{flex:1;display:flex;flex-direction:column;font-size:12.5px;color:var(--ink-2);line-height:1.4}
 .ib-text b{color:var(--ink);font-size:14px;margin-bottom:2px}
-.ib-btn{height:38px;padding:0 16px;font-size:13.5px}
+.ib-btn{height:36px!important;padding:0 16px!important;font-size:13.5px!important}
 .ib-x{position:absolute;top:6px;right:8px;width:28px;height:28px;font-size:20px;color:var(--ink-3);line-height:1}
-.share-ico{display:inline-block;vertical-align:-3px;width:16px;height:16px}
+.share-ico{display:inline-block;vertical-align:-3px;width:15px;height:15px}
 
+/* ---------- buttons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:50px;padding:0 20px;border-radius:16px;font-weight:700;font-size:15px;transition:transform .1s}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:linear-gradient(180deg,#FF7AA0,var(--pink));color:#fff;box-shadow:0 8px 20px rgba(255,92,138,.3)}
+.btn-ghost{background:var(--surface-2);color:var(--ink)}
+.btn-danger{background:var(--pink-soft);color:var(--pink-ink)}
+.btn-block{width:100%}
+.btn-sm{height:40px;padding:0 16px;font-size:13.5px;border-radius:13px}
 
 /* ---------- calendar ---------- */
-.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.cal-title{font-size:24px}
-.icon-btn{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line)}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cal-title{font-size:19px;font-weight:800}
+.icon-btn{width:40px;height:40px;border-radius:14px;display:grid;place-items:center;background:var(--surface-2);color:var(--pink-ink)}
 .icon-btn svg{width:18px;height:18px}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-.cal-dow{text-align:center;font-size:11.5px;font-weight:600;color:var(--ink-3);padding-bottom:6px}
-.day{position:relative;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;font-size:14px;font-weight:500;color:var(--ink);transition:transform .1s}
-.day:active{transform:scale(.94)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px 4px}
+.cal-dow{text-align:center;font-size:11.5px;font-weight:700;color:var(--ink-3);padding-bottom:4px}
+.day{position:relative;aspect-ratio:1;max-height:52px;width:100%;margin:0 auto;border-radius:50%;display:grid;place-items:center;font-size:14px;font-weight:600;color:var(--ink)}
+.day:active{transform:scale(.93)}
 .day.out{visibility:hidden}
-.day.future{color:var(--ink)}
-.day.period{background:var(--period);color:#fff;font-weight:700}
-.day.pred{background:transparent;box-shadow:inset 0 0 0 1.5px var(--period);color:var(--period-ink);font-weight:600;background-image:repeating-linear-gradient(135deg,transparent 0 5px,color-mix(in srgb,var(--period) 14%,transparent) 5px 7px)}
-.day.fertile{background:var(--fertile-soft);color:var(--fertile-ink);font-weight:600}
-.day.ovu{background:var(--ovu);color:#fff;font-weight:700}
+.day.period{background:var(--pink);color:#fff;font-weight:800}
+.day.pred{box-shadow:inset 0 0 0 2px var(--pink);color:var(--pink-ink);border:0;background:repeating-linear-gradient(135deg,transparent 0 5px,rgba(255,92,138,.12) 5px 7px)}
+.day.fertile{background:var(--green-soft);color:var(--green-ink);font-weight:700}
+.day.ovu{background:var(--green-strong);color:#fff;font-weight:800}
 .day.today::after{content:"";position:absolute;inset:-3px;border-radius:50%;border:2px solid var(--ink)}
-.day .mark{position:absolute;bottom:12%;left:50%;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:currentColor;opacity:.75}
-.legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:16px;font-size:12.5px;color:var(--ink-2)}
-.legend span{display:inline-flex;align-items:center;gap:7px}
-.sw{width:14px;height:14px;border-radius:50%;display:inline-block}
-.sw.p{background:var(--period)} .sw.pp{box-shadow:inset 0 0 0 1.5px var(--period)} .sw.f{background:var(--fertile-soft);box-shadow:inset 0 0 0 1px var(--fertile)} .sw.o{background:var(--ovu)}
+.day .mark{position:absolute;bottom:11%;left:50%;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:currentColor;opacity:.8}
+.legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:16px;font-size:12px;color:var(--ink-2);font-weight:500}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:13px;height:13px;border-radius:50%;display:inline-block}
+.sw.p{background:var(--pink)} .sw.pp{box-shadow:inset 0 0 0 2px var(--pink)} .sw.f{background:var(--green-soft);box-shadow:inset 0 0 0 1.5px var(--green)} .sw.o{background:var(--green-strong)}
+.tip{display:flex;gap:12px;align-items:flex-start;font-size:13px;color:var(--ink-2);margin-top:14px}
+.tip .ins-ico{width:36px;height:36px;border-radius:12px}
+.cal-wrap>div+div{margin-top:14px}
 
 /* ---------- insights ---------- */
 .big-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.big-stats .stat-val{font-size:30px}
-.cycle-row{display:grid;grid-template-columns:86px 1fr 34px;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:13px}
-.cycle-row:first-child{border-top:0}
-.bar{height:10px;border-radius:99px;background:var(--surface-2);overflow:hidden;display:flex}
-.bar b{display:block;height:100%;background:var(--period)}
-.bar em{display:block;height:100%;background:color-mix(in srgb,var(--ink-3) 40%,transparent)}
-.sym-row{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13.5px}
-.sym-row .bar{flex:1;height:8px} .sym-row .bar b{background:var(--ovu)}
-.empty{text-align:center;padding:26px 10px;color:var(--ink-2);font-size:14px}
+.stat{background:var(--surface);border-radius:20px;padding:14px;box-shadow:var(--shadow)}
+.stat-label{font-size:12px;font-weight:600;color:var(--ink-3)}
+.stat-val{font-size:26px;font-weight:800;letter-spacing:-.02em;margin-top:2px}
+.stat-val small{font-size:13px;font-weight:600;color:var(--ink-2);margin-left:3px;letter-spacing:0}
+.stat-sub{font-size:12px;color:var(--ink-2)}
+.cyc{padding:14px 0;border-top:1px solid var(--line)}
+.cyc:first-child{border-top:0;padding-top:2px}
+.cyc:last-child{padding-bottom:2px}
+.cyc-top{display:flex;align-items:baseline;gap:8px;margin-bottom:8px}
+.cyc-top b{font-size:14.5px;font-weight:800}
+.badge{font-size:11px;font-weight:700;padding:3px 8px;border-radius:99px;background:var(--yellow-soft);color:var(--yellow-ink)}
+.badge.ok{background:var(--green-soft);color:var(--green-ink)}
+.badge.warn{background:var(--pink-soft);color:var(--pink-ink)}
+.cyc-sub{font-size:12px;color:var(--ink-3);margin-left:auto}
+.strip{display:flex;gap:2px;height:24px}
+.strip i{flex:1;border-radius:4px;min-width:2px}
+.ph-period{background:var(--pink)} .ph-foll{background:var(--yellow)} .ph-fertile{background:var(--green)} .ph-ovu{background:var(--green-strong)} .ph-lut{background:var(--blue)} .ph-future{background:var(--line)}
+.bars{display:flex;align-items:flex-end;gap:10px;height:130px;padding-top:6px}
+.bars .b{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
+.bars .b i{width:100%;max-width:22px;border-radius:99px;background:linear-gradient(180deg,#FF8CAD,var(--pink))}
+.bars .b span{font-size:11.5px;font-weight:700;color:var(--ink-2)}
+.reg{display:flex;gap:10px;align-items:flex-start;margin-top:14px;font-size:13px;color:var(--ink-2)}
+.sym-row{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13.5px;font-weight:500}
+.sym-row .bar{flex:1;height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.sym-row .bar b{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--violet),#C9B6FF)}
+.empty{text-align:center;padding:22px 10px;color:var(--ink-2);font-size:13.5px}
 
 /* ---------- settings ---------- */
 .set-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-top:1px solid var(--line)}
 .set-row:first-child{border-top:0;padding-top:2px}
 .set-row:last-child{padding-bottom:2px}
-.set-label{font-weight:600;font-size:14.5px}
+.set-label{font-weight:700;font-size:14.5px}
 .set-help{font-size:12.5px;color:var(--ink-2);margin-top:2px}
-.stepper{display:flex;align-items:center;gap:4px;background:var(--surface-2);border-radius:12px;padding:3px;flex-shrink:0}
-.stepper button{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;font-size:18px;font-weight:600}
-.stepper button:active{background:var(--surface)}
-.stepper output{min-width:34px;text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
-.switch{position:relative;width:48px;height:28px;flex-shrink:0}
+.stepper{display:flex;align-items:center;gap:2px;background:var(--surface-2);border-radius:14px;padding:3px;flex-shrink:0}
+.stepper button{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;font-size:19px;font-weight:700;color:var(--pink-ink)}
+.stepper button:active{background:#fff}
+.stepper output{min-width:30px;text-align:center;font-weight:800;font-variant-numeric:tabular-nums}
+.switch{position:relative;width:50px;height:30px;flex-shrink:0}
 .switch input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer;z-index:1}
-.switch span{position:absolute;inset:0;border-radius:99px;background:var(--line);transition:background .2s}
-.switch span::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .2s}
-.switch input:checked+span{background:var(--fertile)}
+.switch span{position:absolute;inset:0;border-radius:99px;background:#EADFE4;transition:background .2s}
+.switch span::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.18);transition:transform .2s}
+.switch input:checked+span{background:var(--pink)}
 .switch input:checked+span::after{transform:translateX(20px)}
-.note{font-size:12.5px;color:var(--ink-2);background:var(--surface-2);border-radius:var(--r-sm);padding:12px 14px;line-height:1.5}
+.note{font-size:12.5px;color:var(--ink-2);background:var(--surface);box-shadow:var(--shadow);border-radius:var(--r);padding:16px 18px;line-height:1.55}
+.input{width:100%;height:48px;border-radius:14px;border:1.5px solid var(--line);background:#fff;padding:0 14px;outline:none;font-size:16px}
+.input:focus{border-color:#FFB3C8}
+textarea.input{height:auto;min-height:80px;padding:12px 14px;resize:vertical}
+.name-in{max-width:170px;height:40px;text-align:right}
+
+/* ---------- tab bar ---------- */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:0 12px calc(var(--safe-b) + 10px);pointer-events:none}
+.tabbar-inner{pointer-events:auto;max-width:480px;margin:0 auto;background:rgba(255,255,255,.94);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-radius:26px;box-shadow:0 10px 30px rgba(46,36,51,.12);display:grid;grid-template-columns:1fr 1fr 74px 1fr 1fr;align-items:center;height:68px;padding:0 6px}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:700;color:var(--ink-3);height:100%;justify-content:center}
+.tab svg{width:23px;height:23px}
+.tab.active{color:var(--pink)}
+.fab{width:58px;height:58px;margin:-26px auto 0;border-radius:50%;background:linear-gradient(180deg,#FF7AA0,var(--pink));color:#fff;display:grid;place-items:center;box-shadow:0 10px 22px rgba(255,92,138,.4),0 0 0 5px #fff}
+.fab svg{width:26px;height:26px}
+.fab:active{transform:scale(.95)}
 
 /* ---------- sheet / dialog ---------- */
-.scrim{position:fixed;inset:0;z-index:40;background:rgba(20,14,24,.4);opacity:0;pointer-events:none;transition:opacity .25s}
+.scrim{position:fixed;inset:0;z-index:40;background:rgba(46,30,40,.35);opacity:0;pointer-events:none;transition:opacity .25s}
 .scrim.open{opacity:1;pointer-events:auto}
-.sheet{position:fixed;left:0;right:0;bottom:0;z-index:50;max-width:560px;margin:0 auto;background:var(--surface);border-radius:26px 26px 0 0;max-height:90vh;max-height:90dvh;display:flex;flex-direction:column;transform:translateY(105%);visibility:hidden;transition:transform .3s cubic-bezier(.2,.8,.2,1),visibility 0s .3s;box-shadow:0 -10px 40px rgba(0,0,0,.15)}
-.sheet.open{transform:none;visibility:visible;transition:transform .3s cubic-bezier(.2,.8,.2,1)}
-.sheet-grab{width:40px;height:5px;border-radius:99px;background:var(--line);margin:10px auto 0}
-.sheet-head{padding:12px 20px 12px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line)}
-.sheet-body{padding:6px 20px 20px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:50;max-width:540px;margin:0 auto;background:#fff;border-radius:28px 28px 0 0;max-height:92vh;max-height:92dvh;display:flex;flex-direction:column;transform:translateY(105%);visibility:hidden;transition:transform .32s cubic-bezier(.2,.8,.2,1),visibility 0s .32s;box-shadow:0 -10px 40px rgba(0,0,0,.12)}
+.sheet.open{transform:none;visibility:visible;transition:transform .32s cubic-bezier(.2,.8,.2,1)}
+.sheet-grab{width:42px;height:5px;border-radius:99px;background:#F0DDE4;margin:10px auto 0}
+.sheet-head{padding:12px 20px 12px;border-bottom:1px solid var(--line)}
+.sheet-head h3{font-size:20px;font-weight:800;letter-spacing:-.01em}
+.sheet-body{padding:4px 20px 20px;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 .sheet-foot{padding:12px 20px calc(var(--safe-b) + 14px);border-top:1px solid var(--line)}
-.field-label{font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);margin:20px 0 10px}
+.field-label{font-size:13px;font-weight:800;color:var(--ink);margin:20px 0 10px}
 .seg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-.seg button,.chip{padding:10px 6px;border-radius:12px;background:var(--surface-2);font-size:13.5px;font-weight:600;color:var(--ink-2);border:1.5px solid transparent;transition:all .15s}
-.seg button.on{background:var(--period-soft);color:var(--period-ink);border-color:var(--period)}
-.seg button[data-v="0"].on{background:var(--surface);color:var(--ink);border-color:var(--ink-3)}
+.seg button,.chip{padding:11px 6px;border-radius:14px;background:var(--surface-2);font-size:13.5px;font-weight:600;color:var(--ink-2);border:1.5px solid transparent;transition:all .15s}
+.seg button.on{background:var(--pink-soft);color:var(--pink-ink);border-color:var(--pink)}
+.seg button[data-v="0"].on{background:#fff;color:var(--ink);border-color:var(--ink-3)}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{padding:8px 13px;font-weight:500}
-.chip.on{background:var(--ovu-soft);color:var(--ovu);border-color:var(--ovu);font-weight:600}
-.chips.lh .chip.on{background:var(--fertile-soft);color:var(--fertile-ink);border-color:var(--fertile)}
+.chip{padding:9px 14px;font-weight:600}
+.chip.on{background:var(--violet-soft);color:#6B4FD8;border-color:var(--violet)}
+.chips.lh .chip.on{background:var(--green-soft);color:var(--green-ink);border-color:var(--green-strong)}
 .inline-input{display:flex;align-items:center;gap:8px}
-.input{width:100%;height:46px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);padding:0 14px;outline:none;transition:border-color .2s}
-.input:focus{border-color:var(--ink-3)}
-textarea.input{height:auto;min-height:80px;padding:12px 14px;resize:vertical}
-.fill-hint{margin-top:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;background:var(--period-soft);color:var(--period-ink);padding:10px 12px;border-radius:12px}
-.fill-hint button{font-weight:700;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
-.dialog{position:fixed;z-index:60;left:50%;top:50%;width:min(360px,calc(100vw - 40px));transform:translate(-50%,-46%) scale(.97);opacity:0;pointer-events:none;background:var(--surface);border-radius:22px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.25);transition:all .2s}
+.fill-hint{margin-top:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;background:var(--pink-soft);color:var(--pink-ink);padding:11px 13px;border-radius:14px}
+.fill-hint button{font-weight:800;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
+.dialog{position:fixed;z-index:60;left:50%;top:50%;width:min(360px,calc(100vw - 40px));transform:translate(-50%,-46%) scale(.97);opacity:0;pointer-events:none;background:#fff;border-radius:26px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.2);transition:all .2s}
 .dialog.open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%)}
-.dialog h3{font-size:20px;margin-bottom:8px}
+.dialog h3{font-size:19px;font-weight:800;margin-bottom:8px}
 .dialog p{margin:0 0 18px;color:var(--ink-2);font-size:14px}
-.dialog .actions{margin-top:0}
-.toast{position:fixed;left:50%;bottom:calc(var(--safe-b) + 92px);z-index:70;transform:translate(-50%,20px);opacity:0;background:var(--accent);color:var(--accent-ink);padding:11px 18px;border-radius:99px;font-size:13.5px;font-weight:600;transition:all .25s;pointer-events:none;white-space:nowrap}
+.dialog .acts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.toast{position:fixed;left:50%;bottom:calc(var(--safe-b) + 96px);z-index:70;transform:translate(-50%,20px);opacity:0;background:var(--ink);color:#fff;padding:11px 18px;border-radius:99px;font-size:13.5px;font-weight:600;transition:all .25s;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
 /* ---------- onboarding ---------- */
-.onboard{max-width:440px;margin:0 auto;padding:calc(var(--safe-t) + 40px) 22px calc(var(--safe-b) + 30px);min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
-.onboard h1{font-size:34px;line-height:1.1;margin:22px 0 10px}
-.onboard .q{margin-top:26px}
-.onboard .q-label{font-weight:600;margin-bottom:10px}
-.onboard .q-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.ob-art{width:64px;height:64px;border-radius:20px;background:var(--period-soft);display:grid;place-items:center}
+.onboard{max-width:440px;margin:0 auto;padding:calc(var(--safe-t) + 34px) 22px calc(var(--safe-b) + 26px);min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+.onboard h1{font-size:30px;font-weight:800;letter-spacing:-.03em;line-height:1.12;margin:18px 0 8px}
+.ob-face{width:96px;height:96px}
+.q{margin-top:18px}
+.q-label{font-weight:700;margin-bottom:8px;font-size:14.5px}
+.q-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.ob-card{background:#fff;border-radius:var(--r);box-shadow:var(--shadow);padding:6px 18px 18px;margin-top:20px}
 .unsure{font-size:13px;color:var(--ink-2);margin-top:8px}
 .unsure label{display:inline-flex;align-items:center;gap:8px;cursor:pointer}
-.ob-foot{margin-top:auto;padding-top:28px}
+.unsure input{accent-color:var(--pink);width:17px;height:17px}
+.ob-foot{margin-top:auto;padding-top:22px}
+
+/* ---------- small phones ---------- */
+@media (max-width:370px){
+  .app{padding-left:12px;padding-right:12px}
+  .hello h1{font-size:20px}
+  .wk .wn{font-size:14px}
+  .dial-main{font-size:30px}
+  .dial-wrap .face{width:76px;height:76px}
+  .card{padding:16px}
+  .seg button{font-size:12.5px;padding:10px 3px}
+  .stat-val{font-size:23px}
+}
 
 /* ---------- desktop ---------- */
 @media (min-width:960px){
-  body{font-size:15.5px}
-  .app{max-width:1080px;padding:32px 40px 60px 260px}
-  .tabbar{top:0;bottom:0;right:auto;width:220px;border-top:0;border-right:1px solid var(--line);padding:96px 14px 24px;background:var(--surface)}
-  .tabbar-inner{display:flex;flex-direction:column;gap:4px;max-width:none}
-  .tab{flex-direction:row;gap:12px;padding:10px 12px;font-size:14.5px;justify-content:flex-start}
-  .tab-ico{padding:0;background:none!important}
-  .tab.active{background:var(--surface-2)}
-  .topbar{position:fixed;top:28px;left:28px;z-index:30;margin:0}
-  .topbar .date-chip{display:none}
-  .today-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:22px;align-items:start}
-  .today-grid .section-title:first-child{margin-top:0}
-  .cal-wrap{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:22px;align-items:start}
-  .ins-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
-  .set-wrap{max-width:620px}
-  .sheet{bottom:auto;top:50%;left:50%;right:auto;width:520px;border-radius:26px;transform:translate(-50%,-46%);opacity:0;pointer-events:none;transition:all .22s}
+  .app{max-width:1040px;padding-top:36px}
+  .today-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}
+  .today-grid>div:last-child>.sec:first-child{margin-top:0}
+  .cal-wrap>div+div{margin-top:0}
+  .cal-wrap,.ins-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:24px;align-items:start}
+  .ins-grid>div:last-child>.sec:first-child{margin-top:0}
+  .set-wrap{max-width:620px;margin:0 auto}
+  .sheet{bottom:auto;top:50%;left:50%;right:auto;width:520px;border-radius:28px;transform:translate(-50%,-46%);opacity:0;pointer-events:none;transition:all .22s}
   .sheet.open{transform:translate(-50%,-50%);opacity:1;pointer-events:auto;visibility:visible}
   .sheet-grab{display:none}
-  .toast{bottom:32px}
-  .day{aspect-ratio:auto;height:54px;border-radius:16px}
-  .day.today::after{border-radius:18px}
+  .tabbar{bottom:18px}
 }
 </style>
 </head>
 <body>
 
+<!-- reusable face illustration -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="face-art" viewBox="0 0 120 120">
+      <circle cx="60" cy="60" r="56" fill="var(--face-bg,#FFD86B)"/>
+      <ellipse cx="60" cy="40" rx="34" ry="16" fill="#fff" opacity=".28"/>
+      <circle cx="42" cy="58" r="5.5" fill="#2E2433"/>
+      <circle cx="78" cy="58" r="5.5" fill="#2E2433"/>
+      <circle cx="44" cy="56" r="1.8" fill="#fff"/>
+      <circle cx="80" cy="56" r="1.8" fill="#fff"/>
+      <ellipse cx="32" cy="72" rx="8" ry="5" fill="#FF7A9C" opacity=".45"/>
+      <ellipse cx="88" cy="72" rx="8" ry="5" fill="#FF7A9C" opacity=".45"/>
+      <path d="M48 74 Q60 86 72 74" stroke="#2E2433" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+    </symbol>
+  </defs>
+</svg>
+
 <!-- ============ ONBOARDING ============ -->
 <div id="onboard" class="onboard" hidden>
-  <div class="ob-art"><svg width="34" height="34" viewBox="0 0 24 24" fill="none"><path d="M12 3c3.5 4 6 7.3 6 10.5A6 6 0 0 1 6 13.5C6 10.3 8.5 7 12 3Z" fill="var(--period)"/></svg></div>
-  <h1 class="serif">Know your cycle, gently.</h1>
-  <p class="muted">Bloom estimates your fertile window, ovulation day and next period. Everything stays private on this device.</p>
+  <svg class="ob-face" viewBox="0 0 120 120" style="--face-bg:#FFC2D4"><use href="#face-art"/></svg>
+  <h1>Hi! Let's get to know your cycle</h1>
+  <p class="muted" style="margin:0">Bloom predicts your fertile days, ovulation and next period. Everything stays private on your phone.</p>
 
-  <div class="q">
-    <div class="q-label">When did your last period start?</div>
-    <input id="obDate" class="input" type="date">
-  </div>
-  <div class="q">
-    <div class="q-row">
-      <div><div class="q-label" style="margin:0">How many days does it usually last?</div></div>
-      <div class="stepper" data-ob="period"><button type="button" data-d="-1" aria-label="Fewer days">−</button><output id="obPeriod">5</output><button type="button" data-d="1" aria-label="More days">+</button></div>
+  <div class="ob-card">
+    <div class="q">
+      <div class="q-label">What should we call you?</div>
+      <input id="obName" class="input" type="text" maxlength="24" placeholder="Your name (optional)" autocomplete="given-name">
     </div>
-  </div>
-  <div class="q">
-    <div class="q-row">
-      <div><div class="q-label" style="margin:0">Usual cycle length</div><div class="tiny">First day of one period to the next</div></div>
-      <div class="stepper" data-ob="cycle"><button type="button" data-d="-1" aria-label="Shorter">−</button><output id="obCycle">28</output><button type="button" data-d="1" aria-label="Longer">+</button></div>
+    <div class="q">
+      <div class="q-label">When did your last period start?</div>
+      <input id="obDate" class="input" type="date">
     </div>
-    <div class="unsure"><label><input type="checkbox" id="obUnsure"> Not sure — use 28 days for now</label></div>
+    <div class="q">
+      <div class="q-row">
+        <div class="q-label" style="margin:0">How many days does it last?</div>
+        <div class="stepper" data-ob="period"><button type="button" data-d="-1" aria-label="Fewer days">−</button><output id="obPeriod">5</output><button type="button" data-d="1" aria-label="More days">+</button></div>
+      </div>
+    </div>
+    <div class="q">
+      <div class="q-row">
+        <div><div class="q-label" style="margin:0">Usual cycle length</div><div class="tiny">From one period to the next</div></div>
+        <div class="stepper" data-ob="cycle"><button type="button" data-d="-1" aria-label="Shorter">−</button><output id="obCycle">28</output><button type="button" data-d="1" aria-label="Longer">+</button></div>
+      </div>
+      <div class="unsure"><label><input type="checkbox" id="obUnsure"> Not sure — use 28 days for now</label></div>
+    </div>
   </div>
 
   <div class="ob-foot">
     <button id="obStart" class="btn btn-primary btn-block">Start tracking</button>
-    <p class="tiny" style="text-align:center;margin-top:14px">Predictions are estimates and are not a form of birth control.</p>
+    <p class="tiny" style="text-align:center;margin-top:12px">Predictions are estimates and are not a form of birth control.</p>
   </div>
 </div>
 
 <!-- ============ MAIN APP ============ -->
 <div id="main" hidden>
 <div class="app">
-  <header class="topbar">
-    <div class="brand"><span class="brand-mark"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 3c3.5 4 6 7.3 6 10.5A6 6 0 0 1 6 13.5C6 10.3 8.5 7 12 3Z" fill="var(--period)"/></svg></span>Bloom</div>
-    <span class="date-chip" id="dateChip"></span>
-  </header>
 
-  <!-- TODAY -->
+  <!-- HOME -->
   <section class="screen active" id="s-today">
+    <header class="hello">
+      <div><h1 id="hiText">Hi there</h1><p>How do you feel today?</p></div>
+      <button class="avatar" id="avatarBtn" aria-label="Settings"></button>
+    </header>
     <div class="today-grid">
       <div>
+        <div class="card week" id="week"></div>
         <div class="card hero">
           <div class="dial-wrap">
             <svg id="dial" viewBox="0 0 300 300" aria-hidden="true"></svg>
             <div class="dial-center">
-              <div class="dial-kicker" id="dialKicker">Cycle day</div>
-              <div class="dial-main serif" id="dialMain">—</div>
+              <div class="dial-main" id="dialMain">—</div>
               <div class="dial-sub" id="dialSub"></div>
+              <svg class="face" id="face" viewBox="0 0 120 120"><use href="#face-art"/></svg>
             </div>
           </div>
-          <div class="chance" id="chance"><span class="dot"></span><span id="chanceText"></span></div>
-          <div class="late-banner" id="lateBanner" hidden></div>
-          <div class="actions">
-            <button class="btn btn-period" id="periodBtn">Period started</button>
-            <button class="btn btn-ghost" id="logTodayBtn">Log today</button>
+          <button class="log-pill" id="periodBtn"><i></i><span>Log period</span></button>
+          <div class="phase-legend">
+            <span><i style="background:var(--pink)"></i>Period</span>
+            <span><i style="background:var(--yellow)"></i>Follicular</span>
+            <span><i style="background:var(--green)"></i>Fertile</span>
+            <span><i style="background:var(--blue)"></i>Luteal</span>
           </div>
+          <div class="late-banner" id="lateBanner" hidden></div>
         </div>
-      </div>
-      <div>
         <div class="install-banner" id="installBanner" hidden>
-          <div class="ib-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M12 8v6M9 11l3 3 3-3"/></svg></div>
+          <div class="ib-ico"><img src="icons/icon-192.png" alt=""></div>
           <div class="ib-text"><b>Add Bloom to your home screen</b><span id="ibHelp">Opens like an app and works offline.</span></div>
           <button class="btn btn-primary ib-btn" id="ibInstall">Add</button>
           <button class="ib-x" id="ibClose" aria-label="Dismiss">×</button>
         </div>
-        <div class="section-title">Coming up</div>
-        <div class="stats">
-          <div class="stat"><div class="stat-label"><i style="background:var(--period)"></i>Period</div><div class="stat-val serif" id="stNext">—</div><div class="stat-sub" id="stNextSub"></div></div>
-          <div class="stat"><div class="stat-label"><i style="background:var(--fertile)"></i>Fertile</div><div class="stat-val serif" id="stFert">—</div><div class="stat-sub" id="stFertSub"></div></div>
-          <div class="stat"><div class="stat-label"><i style="background:var(--ovu)"></i>Ovulation</div><div class="stat-val serif" id="stOvu">—</div><div class="stat-sub" id="stOvuSub"></div></div>
+      </div>
+      <div>
+        <div class="sec"><h2>Insight</h2></div>
+        <div class="card">
+          <div class="ins-row"><div class="ins-ico" style="background:var(--pink-soft)">💗</div><div class="ins-body"><div class="ins-title">Chances of pregnancy</div><div class="ins-sub" id="chanceSub">Today</div></div><div class="ins-val" id="chanceVal">—</div></div>
+          <div class="ins-row"><div class="ins-ico" style="background:var(--green-soft)">🌱</div><div class="ins-body"><div class="ins-title">Fertile window</div><div class="ins-sub" id="fertSub"></div></div><div class="ins-val" id="fertVal">—</div></div>
+          <div class="ins-row"><div class="ins-ico" style="background:var(--yellow-soft)">✨</div><div class="ins-body"><div class="ins-title">Ovulation</div><div class="ins-sub" id="ovuSub"></div></div><div class="ins-val" id="ovuVal">—</div></div>
+          <div class="ins-row"><div class="ins-ico" style="background:var(--blue-soft)">🩸</div><div class="ins-body"><div class="ins-title">Next period</div><div class="ins-sub" id="nextSub"></div></div><div class="ins-val" id="nextVal">—</div></div>
         </div>
 
-        <div class="section-title">This week</div>
-        <div class="card"><div class="week" id="week"></div></div>
-
-        <div class="section-title">Today's log</div>
+        <div class="sec"><h2>Today's log</h2><button class="link" id="editToday">+ Add</button></div>
         <div class="card">
-          <div class="row"><span class="muted" id="todaySummary">Nothing logged yet.</span><button class="link" id="editToday">Edit</button></div>
+          <div class="muted" id="todaySummary" style="font-size:14px">Nothing logged yet. Tap + to add symptoms, mood and more.</div>
           <div class="today-log" id="todayPills"></div>
         </div>
       </div>
@@ -334,45 +397,50 @@ textarea.input{height:auto;min-height:80px;padding:12px 14px;resize:vertical}
 
   <!-- CALENDAR -->
   <section class="screen" id="s-cal">
+    <h1 class="page-title">Calendar</h1>
     <div class="cal-wrap">
       <div class="card">
         <div class="cal-head">
-          <button class="icon-btn" id="prevM" aria-label="Previous month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
-          <h2 class="cal-title serif" id="calTitle"></h2>
-          <button class="icon-btn" id="nextM" aria-label="Next month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+          <button class="icon-btn" id="prevM" aria-label="Previous month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+          <h2 class="cal-title" id="calTitle"></h2>
+          <button class="icon-btn" id="nextM" aria-label="Next month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
         </div>
         <div class="cal-grid" id="calGrid"></div>
         <div class="legend">
           <span><i class="sw p"></i>Period</span>
-          <span><i class="sw pp"></i>Predicted period</span>
+          <span><i class="sw pp"></i>Predicted</span>
           <span><i class="sw f"></i>Fertile</span>
           <span><i class="sw o"></i>Ovulation</span>
         </div>
       </div>
       <div>
-        <div class="section-title">Tip</div>
-        <div class="note">Tap any day to log your period, symptoms, discharge or an ovulation test. A positive ovulation (LH) test fine-tunes your ovulation estimate for that cycle.</div>
-        <button class="btn btn-ghost btn-block" id="todayJump" style="margin-top:12px">Jump to today</button>
+        <div class="card">
+          <div class="tip" style="margin:0"><div class="ins-ico" style="background:var(--violet-soft)">💡</div><div>Tap any day to log your period, symptoms, discharge or an ovulation test. A positive ovulation (LH) test fine-tunes that cycle's ovulation day.</div></div>
+          <button class="btn btn-ghost btn-block" id="todayJump" style="margin-top:14px">Jump to today</button>
+        </div>
       </div>
     </div>
   </section>
 
   <!-- INSIGHTS -->
   <section class="screen" id="s-ins">
+    <h1 class="page-title">My cycle</h1>
     <div class="ins-grid">
       <div>
         <div class="big-stats">
-          <div class="stat"><div class="stat-label">Avg cycle</div><div class="stat-val serif" id="inCycle">—</div><div class="stat-sub" id="inCycleSub">days</div></div>
-          <div class="stat"><div class="stat-label">Avg period</div><div class="stat-val serif" id="inPeriod">—</div><div class="stat-sub">days</div></div>
-          <div class="stat"><div class="stat-label">Cycles logged</div><div class="stat-val serif" id="inCount">0</div><div class="stat-sub">complete</div></div>
-          <div class="stat"><div class="stat-label">Variation</div><div class="stat-val serif" id="inVar">—</div><div class="stat-sub" id="inVarSub">shortest–longest</div></div>
+          <div class="stat"><div class="stat-label">Avg cycle</div><div class="stat-val"><span id="inCycle">—</span><small>days</small></div><div class="stat-sub" id="inCycleSub"></div></div>
+          <div class="stat"><div class="stat-label">Avg period</div><div class="stat-val"><span id="inPeriod">—</span><small>days</small></div><div class="stat-sub" id="inPeriodSub"></div></div>
         </div>
-        <div class="note" id="regNote" style="margin-top:12px"></div>
+        <div class="sec"><h2>Cycle history</h2></div>
+        <div class="card" id="cycleList"></div>
       </div>
       <div>
-        <div class="section-title" style="margin-top:0">Recent cycles</div>
-        <div class="card" id="cycleList"></div>
-        <div class="section-title">Most logged symptoms</div>
+        <div class="sec"><h2>Cycle length</h2><span class="badge" id="regBadge" hidden></span></div>
+        <div class="card">
+          <div class="bars" id="lenBars"></div>
+          <div class="reg" id="regNote"></div>
+        </div>
+        <div class="sec"><h2>Top symptoms</h2></div>
         <div class="card" id="symList"></div>
       </div>
     </div>
@@ -381,7 +449,14 @@ textarea.input{height:auto;min-height:80px;padding:12px 14px;resize:vertical}
   <!-- SETTINGS -->
   <section class="screen" id="s-set">
     <div class="set-wrap">
-      <div class="section-title" style="margin-top:0">Your cycle</div>
+      <h1 class="page-title">Settings</h1>
+      <div class="card">
+        <div class="set-row">
+          <div><div class="set-label">Your name</div><div class="set-help">Shown in the greeting.</div></div>
+          <input class="input name-in" id="nameIn" type="text" maxlength="24" placeholder="Optional">
+        </div>
+      </div>
+      <div class="sec"><h2>Your cycle</h2></div>
       <div class="card">
         <div class="set-row">
           <div><div class="set-label">Learn from my history</div><div class="set-help">Use your logged periods to work out averages.</div></div>
@@ -396,52 +471,53 @@ textarea.input{height:auto;min-height:80px;padding:12px 14px;resize:vertical}
           <div class="stepper" data-set="periodLen"><button data-d="-1" aria-label="Fewer">−</button><output id="setPeriod">5</output><button data-d="1" aria-label="More">+</button></div>
         </div>
         <div class="set-row">
-          <div><div class="set-label">Luteal phase</div><div class="set-help">Days from ovulation to period. 14 is typical.</div></div>
+          <div><div class="set-label">Luteal phase</div><div class="set-help">Ovulation to period. 14 is typical.</div></div>
           <div class="stepper" data-set="luteal"><button data-d="-1" aria-label="Fewer">−</button><output id="setLuteal">14</output><button data-d="1" aria-label="More">+</button></div>
         </div>
       </div>
 
-      <div class="section-title">Your data</div>
+      <div class="sec"><h2>Your data</h2></div>
       <div class="card">
         <div class="set-row">
           <div><div class="set-label">Back up</div><div class="set-help">Save a file with all your logs.</div></div>
-          <button class="btn btn-ghost" id="exportBtn" style="height:40px">Export</button>
+          <button class="btn btn-ghost btn-sm" id="exportBtn">Export</button>
         </div>
         <div class="set-row">
           <div><div class="set-label">Restore</div><div class="set-help">Load a backup file.</div></div>
-          <label class="btn btn-ghost" style="height:40px">Import<input type="file" id="importFile" accept="application/json,.json" hidden></label>
+          <label class="btn btn-ghost btn-sm">Import<input type="file" id="importFile" accept="application/json,.json" hidden></label>
         </div>
         <div class="set-row">
           <div><div class="set-label">Erase everything</div><div class="set-help">Deletes all logs on this device.</div></div>
-          <button class="btn btn-danger" id="eraseBtn" style="height:40px">Erase</button>
+          <button class="btn btn-danger btn-sm" id="eraseBtn">Erase</button>
         </div>
       </div>
 
       <div id="installBox" hidden>
-        <div class="section-title">Install</div>
+        <div class="sec"><h2>Install</h2></div>
         <div class="card">
           <div class="set-row">
-            <div><div class="set-label">Add Bloom to your home screen</div><div class="set-help" id="installHelp">Opens like an app and works offline.</div></div>
-            <button class="btn btn-primary" id="installBtn" style="height:40px">Install</button>
+            <div><div class="set-label">Add to home screen</div><div class="set-help" id="installHelp">Opens like an app and works offline.</div></div>
+            <button class="btn btn-primary btn-sm" id="installBtn">Install</button>
           </div>
         </div>
       </div>
 
-      <div class="section-title">Good to know</div>
+      <div class="sec"><h2>Good to know</h2></div>
       <div class="note">
-        Bloom estimates ovulation as <b>14 days before your next period</b> (or the day after a positive ovulation test) and marks the 5 days before plus the day after as your fertile window. Cycles vary, so treat these as estimates — <b>don't rely on Bloom for birth control</b>. Talk to a doctor if your cycles are very irregular, very painful, or you're trying to conceive for a year without success.
+        Bloom estimates ovulation as <b>14 days before your next period</b> (or the day after a positive ovulation test), and your fertile window as the 5 days before ovulation plus the day after. Cycles vary, so these are estimates — <b>don't use Bloom as birth control</b>. See a doctor if your cycles are very irregular or painful, or if you've been trying to conceive for a year.
       </div>
-      <p class="tiny" style="margin:16px 4px">Your data never leaves this device. <a class="link" href="privacy.html" style="font-size:12px">Privacy policy</a></p>
+      <p class="tiny" style="margin:16px 4px;text-align:center">Your data never leaves this device · <a class="link" href="privacy.html" style="font-size:12px">Privacy policy</a></p>
     </div>
   </section>
 </div>
 
 <nav class="tabbar" aria-label="Main">
   <div class="tabbar-inner">
-    <button class="tab active" data-tab="today"><span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 1 8.5 8.5"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg></span>Today</button>
-    <button class="tab" data-tab="cal"><span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></span>Calendar</button>
-    <button class="tab" data-tab="ins"><span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 20V11M12 20V4M19 20v-6"/></svg></span>Insights</button>
-    <button class="tab" data-tab="set"><span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></span>Settings</button>
+    <button class="tab active" data-tab="today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="6.5" height="6.5" rx="2"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="2"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="2"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="2"/></svg>Home</button>
+    <button class="tab" data-tab="cal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Calendar</button>
+    <button class="fab" id="fab" aria-label="Log today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+    <button class="tab" data-tab="ins"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 20V12M12 20V5M19 20v-5"/></svg>Insight</button>
+    <button class="tab" data-tab="set"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4.5 20c1.4-3.6 4.3-5.5 7.5-5.5s6.1 1.9 7.5 5.5"/></svg>Profile</button>
   </div>
 </nav>
 </div>
@@ -451,43 +527,43 @@ textarea.input{height:auto;min-height:80px;padding:12px 14px;resize:vertical}
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
   <div class="sheet-grab"></div>
   <div class="sheet-head">
-    <div><h3 class="serif" id="sheetTitle" style="font-size:22px"></h3><div class="tiny" id="sheetPhase" style="margin-top:2px"></div></div>
+    <h3 id="sheetTitle"></h3><div class="tiny" id="sheetPhase" style="margin-top:2px"></div>
   </div>
   <div class="sheet-body">
-    <div class="field-label">Period</div>
+    <div class="field-label">🩸 Period</div>
     <div class="seg" id="flowSeg">
       <button data-v="0">None</button><button data-v="1">Light</button><button data-v="2">Medium</button><button data-v="3">Heavy</button>
     </div>
     <div class="fill-hint" id="fillHint" hidden><span id="fillText"></span><button id="fillBtn">Mark them</button></div>
 
-    <div class="field-label">Ovulation test</div>
+    <div class="field-label">🧪 Ovulation test</div>
     <div class="chips lh" id="lhChips"><button class="chip" data-v="neg">Negative</button><button class="chip" data-v="pos">Positive</button></div>
 
-    <div class="field-label">Symptoms</div>
+    <div class="field-label">🤕 Symptoms</div>
     <div class="chips" id="symChips"></div>
 
-    <div class="field-label">Discharge</div>
+    <div class="field-label">💧 Discharge</div>
     <div class="chips" id="disChips"></div>
 
-    <div class="field-label">Mood</div>
+    <div class="field-label">😊 Mood</div>
     <div class="chips" id="moodChips"></div>
 
-    <div class="field-label">Basal temperature</div>
+    <div class="field-label">🌡️ Basal temperature</div>
     <div class="inline-input"><input class="input" id="tempIn" type="number" inputmode="decimal" step="0.01" min="34" max="40" placeholder="e.g. 36.55" style="max-width:160px"><span class="muted">°C</span></div>
 
-    <div class="field-label">Intimacy</div>
+    <div class="field-label">❤️ Intimacy</div>
     <div class="chips" id="sexChips"><button class="chip" data-v="protected">Protected</button><button class="chip" data-v="unprotected">Unprotected</button></div>
 
-    <div class="field-label">Notes</div>
+    <div class="field-label">📝 Notes</div>
     <textarea class="input" id="noteIn" placeholder="Anything else to remember?"></textarea>
   </div>
   <div class="sheet-foot"><button class="btn btn-primary btn-block" id="sheetDone">Done</button></div>
 </div>
 
 <div class="dialog" id="dialog" role="alertdialog" aria-modal="true">
-  <h3 class="serif" id="dlgTitle"></h3>
+  <h3 id="dlgTitle"></h3>
   <p id="dlgText"></p>
-  <div class="actions"><button class="btn btn-ghost" id="dlgNo">Cancel</button><button class="btn btn-danger" id="dlgYes">Erase</button></div>
+  <div class="acts"><button class="btn btn-ghost" id="dlgNo">Cancel</button><button class="btn btn-danger" id="dlgYes">Erase</button></div>
 </div>
 <div class="toast" id="toast"></div>
 
@@ -508,14 +584,23 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const mean = a => a.reduce((x, y) => x + y, 0) / a.length;
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const inDays = n => n === 0 ? "today" : n === 1 ? "tomorrow" : n === -1 ? "yesterday" : n > 0 ? `in ${n} days` : `${-n} days ago`;
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 
 const SYMPTOMS = ["Cramps", "Headache", "Bloating", "Tender breasts", "Acne", "Fatigue", "Back pain", "Nausea", "Cravings", "Spotting", "Insomnia", "High libido"];
 const DISCHARGE = ["Dry", "Sticky", "Creamy", "Watery", "Egg-white"];
 const MOODS = ["Happy", "Calm", "Energetic", "Sensitive", "Irritable", "Anxious", "Sad"];
 const FLOW = ["None", "Light", "Medium", "Heavy"];
+const PH = { // ring + strip colours, face colours, names
+  period: { c: "var(--pink)", face: "#FFB3C6", name: "Period" },
+  foll: { c: "var(--yellow)", face: "#FFD86B", name: "Follicular phase" },
+  fertile: { c: "var(--green)", face: "#A8EBC9", name: "Fertile window" },
+  ovu: { c: "var(--green-strong)", face: "#8FE3B9", name: "Ovulation day" },
+  lut: { c: "var(--blue)", face: "#B5D5FF", name: "Luteal phase" },
+  pred: { c: "var(--pink)", face: "#FFC9D6", name: "Period expected" }
+};
 
-/* ================= storage (IndexedDB → localStorage → memory) ================= */
-const DEFAULT = () => ({ v: 1, settings: { cycleLen: 28, periodLen: 5, luteal: 14, auto: true, onboarded: false }, logs: {} });
+/* ================= storage (IndexedDB + localStorage) ================= */
+const DEFAULT = () => ({ v: 1, settings: { cycleLen: 28, periodLen: 5, luteal: 14, auto: true, onboarded: false, name: "" }, logs: {} });
 let state = DEFAULT();
 const store = {
   db: null,
@@ -559,6 +644,7 @@ function sanitize(s) {
   st.cycleLen = clamp(+st.cycleLen || 28, 18, 60);
   st.periodLen = clamp(+st.periodLen || 5, 1, 12);
   st.luteal = clamp(+st.luteal || 14, 9, 18);
+  st.name = typeof st.name === "string" ? st.name.slice(0, 24) : "";
   const logs = {};
   for (const [k, v] of Object.entries(s.logs || {})) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(k) || !v || typeof v !== "object") continue;
@@ -588,25 +674,27 @@ function computeModel() {
   // a period starts on a bleeding day with no bleeding in the 2 days before it
   const starts = flowKeys.filter(k => !flowSet.has(addDays(k, -1)) && !flowSet.has(addDays(k, -2)));
   const runs = starts.map(st => { let end = st, d = st; while (flowSet.has(d) || flowSet.has(addDays(d, 1))) { if (flowSet.has(d)) end = d; d = addDays(d, 1); } return diffDays(st, end) + 1; });
-  const cycles = [];
-  for (let i = 0; i + 1 < starts.length; i++) { const L = diffDays(starts[i], starts[i + 1]); if (L >= 15 && L <= 60) cycles.push({ start: starts[i], len: L, period: runs[i] }); }
-  const recent = cycles.slice(-6).map(c => c.len);
-  const avgCycle = s.auto && recent.length ? Math.round(mean(recent)) : s.cycleLen;
-  // ignore an in-progress period (could still be ongoing) when averaging
-  const doneRuns = runs.filter((r, i) => i < runs.length - 1 || diffDays(starts[i], T) > r + 1).slice(-6);
-  const avgPeriod = s.auto && doneRuns.length ? clamp(Math.round(mean(doneRuns)), 1, 12) : s.periodLen;
   const luteal = s.luteal;
   const lhPos = Object.keys(state.logs).filter(k => state.logs[k].lh === "pos").sort();
   const ovFor = (S, N) => {
     const lh = lhPos.find(k => diffDays(S, k) >= 5 && diffDays(k, N) >= 5);
     return lh ? { day: addDays(lh, 1), lh: true } : { day: addDays(N, -luteal), lh: false };
   };
+  const cycles = [];
+  for (let i = 0; i + 1 < starts.length; i++) {
+    const L = diffDays(starts[i], starts[i + 1]);
+    if (L >= 15 && L <= 60) cycles.push({ start: starts[i], len: L, period: runs[i], ov: ovFor(starts[i], starts[i + 1]).day });
+  }
+  const recent = cycles.slice(-6).map(c => c.len);
+  const avgCycle = s.auto && recent.length ? Math.round(mean(recent)) : s.cycleLen;
+  const doneRuns = runs.filter((r, i) => i < runs.length - 1 || diffDays(starts[i], T) > r + 1).slice(-6);
+  const avgPeriod = s.auto && doneRuns.length ? clamp(Math.round(mean(doneRuns)), 1, 12) : s.periodLen;
 
   const map = {};
   const mark = (k, t) => { const cur = map[k]; const pr = { period: 5, ovu: 4, fertile: 3, pred: 2 }; if (!cur || pr[t] > pr[cur]) map[k] = t; };
   const markFertile = ov => { for (let i = -5; i <= 1; i++) mark(addDays(ov, i), i === 0 ? "ovu" : "fertile"); };
   flowKeys.forEach(k => mark(k, "period"));
-  cycles.forEach(c => markFertile(ovFor(c.start, addDays(c.start, c.len)).day));
+  cycles.forEach(c => markFertile(c.ov));
 
   const last = starts.length ? starts[starts.length - 1] : null;
   let cur = null;
@@ -615,7 +703,6 @@ function computeModel() {
     const late = diffDays(nextRaw, T) > 0 && !flowSet.has(T) ? diffDays(nextRaw, T) : 0;
     const next = late ? T : nextRaw;
     const ov = ovFor(last, nextRaw);
-    // current cycle fertile window (only mark if in the future or recent)
     markFertile(ov.day);
     let S = next;
     const future = [];
@@ -630,96 +717,101 @@ function computeModel() {
     const cycleDay = diffDays(last, T) + 1;
     let nextOv = ov.day, nextFertStart = addDays(ov.day, -5), nextFertEnd = addDays(ov.day, 1);
     if (T > nextFertEnd) { nextOv = future[0].ov; nextFertStart = addDays(nextOv, -5); nextFertEnd = addDays(nextOv, 1); }
-    cur = { last, next, late, ov, cycleDay, nextOv, nextFertStart, nextFertEnd, inPeriod: flowSet.has(T) || (cycleDay <= avgPeriod && runs[runs.length - 1] >= cycleDay - 1 && diffDays(T, addDays(last, avgPeriod - 1)) >= 0 && flowSet.has(addDays(T, -1))) };
+    cur = { last, next, late, ov, cycleDay, nextOv, nextFertStart, nextFertEnd, period: runs[runs.length - 1] };
   }
   M = { T, starts, runs, cycles, avgCycle, avgPeriod, luteal, map, cur, flowSet, histCount: recent.length };
 }
-function phaseOf(k) {
+// phase of day k inside a cycle that starts at S with ovulation day ov
+function phaseIn(S, ov, k, periodLen) {
   const t = M.map[k];
-  if (t === "period") return { key: "period", label: "Period", chance: "period", chanceLabel: "Period" };
-  if (t === "pred") return { key: "pred", label: "Predicted period", chance: "low", chanceLabel: "Low chance of pregnancy" };
-  if (t === "ovu") return { key: "ovu", label: "Estimated ovulation", chance: "peak", chanceLabel: "Peak fertility" };
+  if (t === "period") return "period";
+  if (t === "ovu" && Math.abs(diffDays(ov, k)) <= 1) return "ovu";
+  const d = diffDays(ov, k);
+  if (d >= -5 && d <= 1) return d === 0 ? "ovu" : "fertile";
+  if (diffDays(S, k) < periodLen && k >= M.T && !M.flowSet.has(k) && diffDays(S, k) >= 0 && S === (M.cur && M.cur.last)) return "pred";
+  return d < -5 ? "foll" : "lut";
+}
+function chanceOf(k) {
+  const t = M.map[k];
+  if (t === "period") return { lvl: "period", label: "Low", sub: "On your period" };
+  if (t === "ovu") return { lvl: "peak", label: "Peak 🔥", sub: "Ovulation day" };
   if (t === "fertile") {
-    // within 2 days of the ovulation day → high
-    for (let i = 1; i <= 2; i++) if (M.map[addDays(k, i)] === "ovu") return { key: "fertile", label: "Fertile window", chance: "high", chanceLabel: "High chance of pregnancy" };
-    return { key: "fertile", label: "Fertile window", chance: "med", chanceLabel: "Medium chance of pregnancy" };
+    for (let i = 1; i <= 2; i++) if (M.map[addDays(k, i)] === "ovu") return { lvl: "high", label: "High 🔥", sub: "Fertile window" };
+    return { lvl: "med", label: "Medium", sub: "Fertile window" };
   }
-  return { key: "", label: M.cur ? "Low fertility" : "", chance: "low", chanceLabel: "Low chance of pregnancy" };
+  return { lvl: "low", label: "Low", sub: M.cur ? "Outside fertile window" : "Log a period to start" };
 }
 
-/* ================= rendering: today ================= */
+/* ================= rendering: home ================= */
 function arcPath(cx, cy, r, a0, a1) {
   const p = a => [cx + r * Math.cos(a), cy + r * Math.sin(a)];
   const [x0, y0] = p(a0), [x1, y1] = p(a1);
   return `M${x0.toFixed(2)} ${y0.toFixed(2)} A${r} ${r} 0 ${a1 - a0 > Math.PI ? 1 : 0} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`;
 }
+function cyclePhases() {
+  const c = M.cur;
+  const total = c ? Math.max(M.avgCycle, c.cycleDay) : M.avgCycle;
+  const out = [];
+  for (let d = 1; d <= total; d++) {
+    if (!c) { out.push(d <= M.avgPeriod ? "period" : d < M.avgCycle - M.luteal - 5 ? "foll" : d <= M.avgCycle - M.luteal + 1 ? (d === M.avgCycle - M.luteal ? "ovu" : "fertile") : "lut"); continue; }
+    const k = addDays(c.last, d - 1);
+    let ph = phaseIn(c.last, c.ov.day, k, M.avgPeriod);
+    if (ph === "pred") ph = "period";
+    if (ph === "lut" && c.late && d > M.avgCycle) ph = "lut";
+    out.push(ph);
+  }
+  return out;
+}
 function renderDial() {
   const svg = $("#dial"), c = M.cur;
-  const total = c ? Math.max(M.avgCycle, c.cycleDay) : M.avgCycle;
-  const cx = 150, cy = 150, r = 128, gap = total > 40 ? 0.012 : 0.02;
-  const css = getComputedStyle(document.documentElement);
-  const col = { period: css.getPropertyValue("--period"), pred: css.getPropertyValue("--period"), fertile: css.getPropertyValue("--fertile"), ovu: css.getPropertyValue("--ovu"), "": css.getPropertyValue("--line") };
-  let out = "";
-  for (let d = 1; d <= total; d++) {
-    const a0 = -Math.PI / 2 + (d - 1) / total * Math.PI * 2 + gap;
-    const a1 = -Math.PI / 2 + d / total * Math.PI * 2 - gap;
-    let t = "";
-    if (c) {
-      const k = addDays(c.last, d - 1);
-      t = M.map[k] || "";
-      if (!t && d <= M.avgPeriod && k > M.T) t = "pred";
-    }
-    const past = c && d < c.cycleDay;
-    const op = t === "" ? 1 : t === "pred" ? .35 : past ? .55 : 1;
-    out += `<path d="${arcPath(cx, cy, r, a0, a1)}" stroke="${col[t]}" stroke-opacity="${op}" stroke-width="${t === "ovu" ? 20 : 14}" stroke-linecap="butt" fill="none"/>`;
+  const phases = cyclePhases(), total = phases.length;
+  const cx = 150, cy = 150, r = 130, sw = 20;
+  const gap = 0.07; // radians between phase groups
+  let out = `<circle cx="${cx}" cy="${cy}" r="${r}" stroke="#F8EDF1" stroke-width="${sw}" fill="none"/>`;
+  // group consecutive phases (ovulation drawn as part of its fertile group, then marked)
+  const groups = [];
+  phases.forEach((p, i) => {
+    const g = p === "ovu" ? "fertile" : p;
+    const lastG = groups[groups.length - 1];
+    if (lastG && lastG.p === g) lastG.end = i; else groups.push({ p: g, start: i, end: i });
+  });
+  const ang = i => -Math.PI / 2 + i / total * Math.PI * 2;
+  groups.forEach(g => {
+    let a0 = ang(g.start) + gap / 2, a1 = ang(g.end + 1) - gap / 2;
+    if (a1 - a0 < 0.02) { const m = (a0 + a1) / 2; a0 = m - .01; a1 = m + .01; }
+    out += `<path d="${arcPath(cx, cy, r, a0, a1)}" stroke="${PH[g.p].c}" stroke-width="${sw}" stroke-linecap="round" fill="none"/>`;
+  });
+  const ovIdx = phases.indexOf("ovu");
+  if (ovIdx >= 0) {
+    const a = ang(ovIdx + .5), x = cx + r * Math.cos(a), y = cy + r * Math.sin(a);
+    out += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="6" fill="#fff"/><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.4" fill="var(--green-strong)"/>`;
   }
+  // day ticks text: 1 at top
   if (c) {
-    const a = -Math.PI / 2 + (c.cycleDay - .5) / total * Math.PI * 2;
-    const x = cx + r * Math.cos(a), y = cy + r * Math.sin(a);
-    out += `<circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="13" fill="${css.getPropertyValue("--surface")}" stroke="${css.getPropertyValue("--ink")}" stroke-width="3"/>`;
+    const a = ang(c.cycleDay - .5), x = cx + r * Math.cos(a), y = cy + r * Math.sin(a);
+    const col = PH[phases[c.cycleDay - 1]] ? PH[phases[c.cycleDay - 1]].c : "var(--pink)";
+    out += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="16" fill="#fff" style="filter:drop-shadow(0 3px 6px rgba(46,36,51,.18))"/><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="9" fill="${col}"/>`;
   }
   svg.innerHTML = out;
+  return phases;
 }
 function renderToday() {
   const T = M.T, c = M.cur;
-  $("#dateChip").textContent = fmt(T, { weekday: "short", month: "short", day: "numeric" });
-  renderDial();
-  const ph = phaseOf(T);
-  const chance = $("#chance");
-  chance.className = "chance " + ph.chance;
-  $("#chanceText").textContent = ph.chanceLabel;
-  const late = $("#lateBanner");
-  late.hidden = true;
+  const nm = state.settings.name.trim();
+  const hr = new Date().getHours();
+  $("#hiText").textContent = nm ? `Hi, ${nm}` : (hr < 12 ? "Good morning" : hr < 18 ? "Good afternoon" : "Good evening");
+  $("#avatarBtn").innerHTML = nm ? esc(nm[0].toUpperCase()) : "🌸";
+  const phases = renderDial();
+  const todayPh = c ? (M.map[T] === "period" ? "period" : phases[c.cycleDay - 1]) : "foll";
+  $("#face").style.setProperty("--face-bg", (PH[todayPh] || PH.foll).face);
+  const late = $("#lateBanner"); late.hidden = true;
   if (!c) {
-    $("#dialKicker").textContent = "Welcome";
-    $("#dialMain").textContent = "Log a period";
-    $("#dialSub").textContent = "to see predictions";
-    chance.hidden = true;
+    $("#dialMain").textContent = "Hello!";
+    $("#dialSub").textContent = "Log a period to begin";
   } else {
-    chance.hidden = false;
-    $("#dialKicker").textContent = "Cycle day";
-    $("#dialMain").textContent = c.cycleDay;
-    let sub;
-    if (ph.key === "period") sub = "Period";
-    else if (ph.key === "ovu") sub = "Ovulation day";
-    else if (ph.key === "fertile") sub = `Ovulation ${inDays(diffDays(T, c.nextOv))}`;
-    else if (T < c.nextFertStart) sub = `Fertile window ${inDays(diffDays(T, c.nextFertStart))}`;
-    else sub = c.late ? "Period is late" : `Period ${inDays(diffDays(T, c.next))}`;
-    $("#dialSub").textContent = sub;
-    if (c.late) { late.hidden = false; late.textContent = `Your period is ${c.late} day${c.late > 1 ? "s" : ""} later than expected. Cycles can shift from stress, travel or illness — consider a pregnancy test if it's possible.`; }
-  }
-  // stats
-  if (c) {
-    $("#stNext").textContent = c.late ? "Late" : fmt(c.next);
-    $("#stNextSub").textContent = c.late ? `${c.late}d overdue` : inDays(diffDays(T, c.next));
-    const inFert = T >= c.nextFertStart && T <= c.nextFertEnd;
-    $("#stFert").textContent = inFert ? "Now" : fmt(c.nextFertStart);
-    $("#stFertSub").textContent = inFert ? `until ${fmt(c.nextFertEnd)}` : `${fmt(c.nextFertStart)}–${fmt(c.nextFertEnd, { day: "numeric" })}`;
-    $("#stOvu").textContent = fmt(c.nextOv);
-    $("#stOvuSub").textContent = inDays(diffDays(T, c.nextOv)) + (c.ov.lh && c.nextOv === c.ov.day ? " · LH test" : "");
-  } else {
-    ["#stNext", "#stFert", "#stOvu"].forEach(s => $(s).textContent = "—");
-    ["#stNextSub", "#stFertSub", "#stOvuSub"].forEach(s => $(s).textContent = "");
+    $("#dialMain").textContent = `Day ${c.cycleDay}`;
+    $("#dialSub").textContent = c.late ? "Period is late" : PH[todayPh].name;
+    if (c.late) { late.hidden = false; late.textContent = `Your period is ${c.late} day${c.late > 1 ? "s" : ""} later than expected. Cycles can shift with stress, travel or illness — consider a pregnancy test if it's possible.`; }
   }
   // week strip
   const dow = fromKey(T).getUTCDay();
@@ -727,14 +819,30 @@ function renderToday() {
   for (let i = 0; i < 7; i++) {
     const k = addDays(T, i - dow);
     const t = M.map[k] || "";
-    w += `<button data-day="${k}" style="display:block"><div class="wd">${fmt(k, { weekday: "narrow" })}</div><div class="wn day ${t === "pred" ? "pred" : t}${k === T ? " today" : ""}" style="aspect-ratio:auto">${fromKey(k).getUTCDate()}</div></button>`;
+    w += `<button class="wk ${t}${k === T ? " today" : ""}" data-day="${k}"><span class="wd">${k === T ? "Today" : fmt(k, { weekday: "short" }).slice(0, 2)}</span><span class="wn">${fromKey(k).getUTCDate()}</span><span class="wdot"></span></button>`;
   }
   $("#week").innerHTML = w;
-  // buttons
+  // period button
   const todayFlow = getLog(T).flow;
   const pb = $("#periodBtn");
-  if (todayFlow) { pb.textContent = "Period ended"; pb.className = "btn btn-ghost"; }
-  else { pb.textContent = "Period started"; pb.className = "btn btn-period"; }
+  pb.classList.toggle("on", !!todayFlow);
+  pb.querySelector("span").textContent = todayFlow ? "Period ended" : "Log period";
+  // insight
+  const ch = chanceOf(T);
+  const cv = $("#chanceVal"); cv.textContent = ch.label; cv.className = "ins-val lvl-" + ch.lvl;
+  $("#chanceSub").textContent = ch.sub;
+  if (c) {
+    const inFert = T >= c.nextFertStart && T <= c.nextFertEnd;
+    $("#fertVal").textContent = inFert ? "Now" : fmt(c.nextFertStart);
+    $("#fertSub").textContent = `${fmt(c.nextFertStart)} – ${fmt(c.nextFertEnd)}`;
+    $("#ovuVal").textContent = fmt(c.nextOv);
+    $("#ovuSub").textContent = cap(inDays(diffDays(T, c.nextOv))) + (c.ov.lh && c.nextOv === c.ov.day ? " · from LH test" : "");
+    $("#nextVal").textContent = c.late ? "Late" : fmt(c.next);
+    $("#nextSub").textContent = c.late ? `${c.late} day${c.late > 1 ? "s" : ""} overdue` : cap(inDays(diffDays(T, c.next)));
+  } else {
+    ["#fertVal", "#ovuVal", "#nextVal"].forEach(s => $(s).textContent = "—");
+    ["#fertSub", "#ovuSub", "#nextSub"].forEach(s => $(s).textContent = "Log a period first");
+  }
   // today pills
   const l = getLog(T), pills = [];
   if (l.flow) pills.push(`<span class="pill p">${FLOW[l.flow]} flow</span>`);
@@ -745,18 +853,20 @@ function renderToday() {
   if (l.temp) pills.push(`<span class="pill">${esc(l.temp)}°C</span>`);
   if (l.sex) pills.push(`<span class="pill">Intimacy</span>`);
   $("#todayPills").innerHTML = pills.join("");
-  $("#todaySummary").textContent = pills.length ? (l.note ? "“" + l.note.slice(0, 60) + (l.note.length > 60 ? "…" : "") + "”" : "Logged today") : "Nothing logged yet.";
+  const sum = $("#todaySummary");
+  sum.hidden = !!pills.length && !l.note;
+  sum.textContent = pills.length ? (l.note ? "“" + l.note.slice(0, 80) + (l.note.length > 80 ? "…" : "") + "”" : "") : "Nothing logged yet. Tap + to add symptoms, mood and more.";
 }
 
 /* ================= rendering: calendar ================= */
-let calMonth = null; // "YYYY-MM"
+let calMonth = null;
 function renderCalendar() {
   if (!calMonth) calMonth = M.T.slice(0, 7);
   const [y, m] = calMonth.split("-").map(Number);
   const first = `${y}-${pad(m)}-01`;
   const days = new Date(Date.UTC(y, m, 0)).getUTCDate();
   $("#calTitle").textContent = fromKey(first).toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
-  let h = ["S", "M", "T", "W", "T", "F", "S"].map(d => `<div class="cal-dow">${d}</div>`).join("");
+  let h = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map(d => `<div class="cal-dow">${d}</div>`).join("");
   const lead = fromKey(first).getUTCDay();
   for (let i = 0; i < lead; i++) h += `<div class="day out"></div>`;
   for (let d = 1; d <= days; d++) {
@@ -770,33 +880,58 @@ function renderCalendar() {
 }
 
 /* ================= rendering: insights ================= */
-function renderInsights() {
-  const cyc = M.cycles.slice(-6);
-  $("#inCycle").textContent = M.avgCycle;
-  $("#inCycleSub").textContent = M.histCount && state.settings.auto ? `days · from ${M.histCount} cycle${M.histCount > 1 ? "s" : ""}` : "days · from settings";
-  $("#inPeriod").textContent = M.avgPeriod;
-  $("#inCount").textContent = M.cycles.length;
-  if (cyc.length >= 2) {
-    const lens = cyc.map(c => c.len), lo = Math.min(...lens), hi = Math.max(...lens);
-    $("#inVar").textContent = hi - lo + "d";
-    $("#inVarSub").textContent = `${lo}–${hi} days`;
-    $("#regNote").innerHTML = hi - lo <= 7
-      ? "<b>Your cycles look regular.</b> Predictions should be fairly reliable."
-      : "<b>Your cycles vary by more than a week.</b> Predictions are less reliable — ovulation tests or temperature tracking can help.";
-  } else {
-    $("#inVar").textContent = "—"; $("#inVarSub").textContent = "shortest–longest";
-    $("#regNote").innerHTML = "Log at least <b>3 periods</b> and Bloom will learn your own averages.";
+function stripHTML(S, len, ov, upto) {
+  let s = "";
+  for (let i = 0; i < len; i++) {
+    const k = addDays(S, i);
+    let ph = upto && k > upto ? "future" : phaseIn(S, ov, k, M.avgPeriod);
+    if (ph === "pred") ph = "future";
+    s += `<i class="ph-${ph}"></i>`;
   }
-  const maxLen = Math.max(35, ...cyc.map(c => c.len));
-  $("#cycleList").innerHTML = cyc.length
-    ? cyc.slice().reverse().map(c => `<div class="cycle-row"><span class="muted">${fmt(c.start)}</span><div class="bar" title="${c.period} period days of ${c.len}"><b style="width:${c.period / maxLen * 100}%"></b><em style="width:${(c.len - c.period) / maxLen * 100}%"></em></div><b style="text-align:right">${c.len}d</b></div>`).join("")
-    : `<div class="empty">Complete cycles will show up here once you've logged two periods.</div>`;
+  return `<div class="strip">${s}</div>`;
+}
+function renderInsights() {
+  $("#inCycle").textContent = M.avgCycle;
+  $("#inCycleSub").textContent = M.histCount && state.settings.auto ? `From ${M.histCount} cycle${M.histCount > 1 ? "s" : ""}` : "From your settings";
+  $("#inPeriod").textContent = M.avgPeriod;
+  $("#inPeriodSub").textContent = M.runs.length ? `${M.runs.length} period${M.runs.length > 1 ? "s" : ""} logged` : "From your settings";
+  // history
+  let h = "";
+  const c = M.cur;
+  if (c) {
+    const len = Math.max(M.avgCycle, c.cycleDay);
+    h += `<div class="cyc"><div class="cyc-top"><b>Current cycle</b><span class="badge">Day ${c.cycleDay}</span><span class="cyc-sub">Started ${fmt(c.last)}</span></div>${stripHTML(c.last, len, c.ov.day, M.T)}</div>`;
+  }
+  M.cycles.slice(-6).reverse().forEach(cy => {
+    h += `<div class="cyc"><div class="cyc-top"><b>${cy.len} days</b><span class="cyc-sub">Started ${fmt(cy.start, { month: "short", day: "numeric", year: "numeric" })}</span></div>${stripHTML(cy.start, cy.len, cy.ov)}</div>`;
+  });
+  $("#cycleList").innerHTML = h + (M.cycles.length ? "" : `<div class="empty">Past cycles show up here once you've logged two periods. Tap a day in the calendar to add earlier periods.</div>`);
+  h = `<div class="phase-legend" style="justify-content:flex-start;margin-top:12px"><span><i style="background:var(--pink)"></i>Period</span><span><i style="background:var(--yellow)"></i>Follicular</span><span><i style="background:var(--green)"></i>Fertile</span><span><i style="background:var(--green-strong)"></i>Ovulation</span><span><i style="background:var(--blue)"></i>Luteal</span></div>`;
+  $("#cycleList").insertAdjacentHTML("beforeend", h);
+  // length bars
+  const cyc = M.cycles.slice(-8);
+  const badge = $("#regBadge");
+  if (cyc.length) {
+    const lens = cyc.map(x => x.len), lo = Math.min(...lens), hi = Math.max(...lens), max = Math.max(...lens, 35);
+    $("#lenBars").innerHTML = cyc.map(x => `<div class="b"><i style="height:${Math.max(12, x.len / max * 100)}%"></i><span>${x.len}</span></div>`).join("");
+    const normal = M.avgCycle >= 21 && M.avgCycle <= 35;
+    const regular = hi - lo <= 7;
+    badge.hidden = false;
+    badge.className = "badge " + (normal && regular ? "ok" : "warn");
+    badge.textContent = normal && regular ? "✓ Normal" : !normal ? "Check" : "Irregular";
+    $("#regNote").innerHTML = `<span>📏</span><span>${lo === hi ? `Your cycles are <b>${lo} days</b>.` : `Your cycles range from <b>${lo} to ${hi} days</b>.`} ${regular ? "That's regular, so predictions should be fairly reliable." : "They vary by more than a week, so predictions are less reliable — ovulation tests can help."} A typical cycle is 21–35 days.</span>`;
+  } else {
+    badge.hidden = true;
+    $("#lenBars").innerHTML = `<div class="empty" style="width:100%">Log at least two periods to see your cycle lengths.</div>`;
+    $("#regNote").innerHTML = `<span>💡</span><span>A typical cycle is 21–35 days. Bloom learns yours as you log.</span>`;
+  }
+  // symptoms
   const counts = {};
   Object.values(state.logs).forEach(l => l.sym.forEach(s => counts[s] = (counts[s] || 0) + 1));
   const top = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5);
   const tmax = top.length ? top[0][1] : 1;
   $("#symList").innerHTML = top.length
-    ? top.map(([s, n]) => `<div class="sym-row"><span style="width:110px">${esc(s)}</span><div class="bar"><b style="width:${n / tmax * 100}%"></b></div><span class="muted" style="width:28px;text-align:right">${n}</span></div>`).join("")
+    ? top.map(([s, n]) => `<div class="sym-row"><span style="width:112px">${esc(s)}</span><div class="bar"><b style="width:${n / tmax * 100}%"></b></div><span class="muted" style="width:26px;text-align:right">${n}</span></div>`).join("")
     : `<div class="empty">Symptoms you log will be summarised here.</div>`;
 }
 
@@ -807,7 +942,8 @@ function renderSettings() {
   $("#setCycle").textContent = s.cycleLen;
   $("#setPeriod").textContent = s.periodLen;
   $("#setLuteal").textContent = s.luteal;
-  $("#cycHelp").textContent = s.auto ? (M.histCount ? `Your history says ${M.avgCycle} days — this is the fallback.` : "Used until you've logged 2 periods.") : "Always used for predictions.";
+  if (document.activeElement !== $("#nameIn")) $("#nameIn").value = s.name;
+  $("#cycHelp").textContent = s.auto ? (M.histCount ? `Your history says ${M.avgCycle} days — this is the backup.` : "Used until you've logged 2 periods.") : "Always used for predictions.";
 }
 function renderAll() { computeModel(); renderToday(); renderCalendar(); renderInsights(); renderSettings(); }
 
@@ -817,14 +953,15 @@ function chipHTML(list, sel) { return list.map(v => `<button class="chip${sel.in
 function openSheet(k) {
   sheetDay = k; draft = JSON.parse(JSON.stringify(getLog(k)));
   $("#sheetTitle").textContent = fmt(k, { weekday: "long", month: "long", day: "numeric" });
-  const ph = phaseOf(k);
-  $("#sheetPhase").textContent = (k === M.T ? "Today" : inDays(diffDays(M.T, k)).replace(/^./, c => c.toUpperCase())) + (ph.label ? " · " + ph.label : "") + (M.cur && k >= M.cur.last ? ` · cycle day ${diffDays(M.cur.last, k) + 1}` : "");
+  const t = M.map[k];
+  const label = t === "period" ? "Period" : t === "pred" ? "Predicted period" : t === "ovu" ? "Estimated ovulation" : t === "fertile" ? "Fertile window" : "";
+  $("#sheetPhase").textContent = (k === M.T ? "Today" : cap(inDays(diffDays(M.T, k)))) + (label ? " · " + label : "") + (M.cur && k >= M.cur.last ? ` · Cycle day ${diffDays(M.cur.last, k) + 1}` : "");
   paintSheet();
   $("#scrim").classList.add("open"); $("#sheet").classList.add("open");
   $(".sheet-body").scrollTop = 0;
 }
 function paintSheet() {
-  $$("#flowSeg button").forEach(b => b.classList.toggle("on", +b.dataset.v === draft.flow && draft.flow > 0 || (+b.dataset.v === 0 && !draft.flow)));
+  $$("#flowSeg button").forEach(b => b.classList.toggle("on", +b.dataset.v === draft.flow));
   $$("#lhChips .chip").forEach(b => b.classList.toggle("on", draft.lh === b.dataset.v));
   $("#symChips").innerHTML = chipHTML(SYMPTOMS, draft.sym);
   $("#disChips").innerHTML = chipHTML(DISCHARGE, draft.dis ? [draft.dis] : []);
@@ -836,8 +973,7 @@ function paintSheet() {
 }
 function fillCandidates() {
   if (!draft.flow) return [];
-  const prevFlow = getLog(addDays(sheetDay, -1)).flow || getLog(addDays(sheetDay, -2)).flow;
-  if (prevFlow) return [];
+  if (getLog(addDays(sheetDay, -1)).flow || getLog(addDays(sheetDay, -2)).flow) return [];
   const out = [];
   for (let i = 1; i < M.avgPeriod; i++) { const d = addDays(sheetDay, i); if (d > M.T) break; if (getLog(d).flow) return []; out.push(d); }
   return out;
@@ -869,12 +1005,13 @@ $("#sexChips").addEventListener("click", e => { const b = e.target.closest(".chi
 $("#tempIn").addEventListener("input", e => { const v = e.target.value.trim(); draft.temp = v && +v >= 30 && +v <= 45 ? v : ""; });
 $("#noteIn").addEventListener("input", e => { draft.note = e.target.value.slice(0, 1000); });
 $("#sheetDone").addEventListener("click", closeSheet);
-$("#scrim").addEventListener("click", () => { closeSheet(); closeDialog(); });
+$("#scrim").addEventListener("click", () => { if ($("#dialog").classList.contains("open")) closeDialog(); else closeSheet(); });
 
 /* ================= dialog + toast ================= */
 let dlgYes = null;
-function openDialog(title, text, yesLabel, onYes) {
+function openDialog(title, text, yesLabel, onYes, cls) {
   $("#dlgTitle").textContent = title; $("#dlgText").textContent = text; $("#dlgYes").textContent = yesLabel; dlgYes = onYes;
+  $("#dlgYes").className = "btn " + (cls || "btn-danger");
   $("#scrim").classList.add("open"); $("#dialog").classList.add("open");
 }
 function closeDialog() { $("#dialog").classList.remove("open"); if (!$("#sheet").classList.contains("open")) $("#scrim").classList.remove("open"); }
@@ -893,22 +1030,25 @@ function go(tab) {
   try { history.replaceState(null, "", tab === "today" ? location.pathname : "#" + tab); } catch (e) {}
 }
 $$(".tab").forEach(b => b.addEventListener("click", () => go(b.dataset.tab)));
+$("#fab").addEventListener("click", () => openSheet(M.T));
+$("#avatarBtn").addEventListener("click", () => go("set"));
+$("#face").addEventListener("click", () => openSheet(M.T));
 document.addEventListener("click", e => { const d = e.target.closest("[data-day]"); if (d) openSheet(d.dataset.day); });
-$("#prevM").addEventListener("click", () => { const [y, m] = calMonth.split("-").map(Number); const d = new Date(Date.UTC(y, m - 2, 1)); calMonth = toKey(d).slice(0, 7); renderCalendar(); });
-$("#nextM").addEventListener("click", () => { const [y, m] = calMonth.split("-").map(Number); const d = new Date(Date.UTC(y, m, 1)); calMonth = toKey(d).slice(0, 7); renderCalendar(); });
+$("#prevM").addEventListener("click", () => { const [y, m] = calMonth.split("-").map(Number); calMonth = toKey(new Date(Date.UTC(y, m - 2, 1))).slice(0, 7); renderCalendar(); });
+$("#nextM").addEventListener("click", () => { const [y, m] = calMonth.split("-").map(Number); calMonth = toKey(new Date(Date.UTC(y, m, 1))).slice(0, 7); renderCalendar(); });
 $("#todayJump").addEventListener("click", () => { calMonth = M.T.slice(0, 7); renderCalendar(); });
+// swipe months on the calendar
+(() => { let x0 = null; const g = $("#calGrid");
+  g.addEventListener("touchstart", e => { x0 = e.touches[0].clientX; }, { passive: true });
+  g.addEventListener("touchend", e => { if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0; x0 = null; if (Math.abs(dx) > 60) (dx < 0 ? $("#nextM") : $("#prevM")).click(); }, { passive: true });
+})();
 
-/* ================= today actions ================= */
+/* ================= home actions ================= */
 $("#periodBtn").addEventListener("click", () => {
   const T = M.T, l = getLog(T);
-  if (l.flow) {
-    // period ended: clear today's flow if it's the only mark today, otherwise just note it's over
-    l.flow = 0; setLog(T, l); renderAll(); toast("Period marked as ended");
-  } else {
-    l.flow = 2; setLog(T, l); renderAll(); openSheet(T);
-  }
+  if (l.flow) { l.flow = 0; setLog(T, l); renderAll(); toast("Period marked as ended"); }
+  else { l.flow = 2; setLog(T, l); renderAll(); openSheet(T); }
 });
-$("#logTodayBtn").addEventListener("click", () => openSheet(M.T));
 $("#editToday").addEventListener("click", () => openSheet(M.T));
 
 /* ================= settings ================= */
@@ -920,6 +1060,7 @@ $$("[data-set]").forEach(st => st.addEventListener("click", e => {
   save(); renderAll();
 }));
 $("#autoAvg").addEventListener("change", e => { state.settings.auto = e.target.checked; save(); renderAll(); });
+$("#nameIn").addEventListener("input", e => { state.settings.name = e.target.value.slice(0, 24); save(); renderToday(); });
 $("#exportBtn").addEventListener("click", async () => {
   const data = JSON.stringify(state, null, 2);
   const name = `bloom-backup-${M.T}.json`;
@@ -932,7 +1073,7 @@ $("#exportBtn").addEventListener("click", async () => {
     document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
     toast("Backup saved");
   } catch (e) {
-    try { await navigator.clipboard.writeText(data); toast("Backup copied to clipboard"); } catch (e2) { toast("Couldn't export here"); }
+    try { await navigator.clipboard.writeText(data); toast("Backup copied"); } catch (e2) { toast("Couldn't export here"); }
   }
 });
 $("#importFile").addEventListener("change", async e => {
@@ -940,15 +1081,11 @@ $("#importFile").addEventListener("change", async e => {
   try {
     const s = sanitize(JSON.parse(await f.text()));
     s.settings.onboarded = true;
-    openDialog("Restore backup?", `This replaces what's on this device with ${Object.keys(s.logs).length} logged days from the file.`, "Restore", () => { state = s; save(); renderAll(); toast("Backup restored"); });
-    $("#dlgYes").className = "btn btn-primary";
+    openDialog("Restore backup?", `This replaces what's on this device with ${Object.keys(s.logs).length} logged days from the file.`, "Restore", () => { state = s; save(); renderAll(); toast("Backup restored"); }, "btn-primary");
   } catch (err) { toast("That file isn't a Bloom backup"); }
 });
 $("#eraseBtn").addEventListener("click", () => {
-  openDialog("Erase everything?", "All your logs and settings on this device will be deleted. This can't be undone.", "Erase", () => {
-    state = DEFAULT(); store.save(); showOnboarding();
-  });
-  $("#dlgYes").className = "btn btn-danger";
+  openDialog("Erase everything?", "All your logs and settings on this device will be deleted. This can't be undone.", "Erase", () => { state = DEFAULT(); store.save(); showOnboarding(); });
 });
 
 /* ================= onboarding ================= */
@@ -956,6 +1093,7 @@ function showOnboarding() {
   $("#main").hidden = true; $("#onboard").hidden = false;
   const T = todayKey();
   $("#obDate").max = T; $("#obDate").value = addDays(T, -10);
+  window.scrollTo(0, 0);
 }
 function showMain() { $("#onboard").hidden = true; $("#main").hidden = false; renderAll(); go((location.hash || "").slice(1)); }
 const ob = { period: 5, cycle: 28 };
@@ -973,7 +1111,8 @@ $("#obStart").addEventListener("click", () => {
   if (!d || !/^\d{4}-\d{2}-\d{2}$/.test(d)) { toast("Pick the date your last period started"); return; }
   if (d > T) d = T;
   state.settings.cycleLen = ob.cycle; state.settings.periodLen = ob.period; state.settings.onboarded = true;
-  for (let i = 0; i < ob.period; i++) { const k = addDays(d, i); if (k > T) break; const l = getLog(k); l.flow = i === 0 || i === ob.period - 1 ? (i === 0 ? 2 : 1) : (i === 1 ? 3 : 2); state.logs[k] = l; }
+  state.settings.name = $("#obName").value.trim().slice(0, 24);
+  for (let i = 0; i < ob.period; i++) { const k = addDays(d, i); if (k > T) break; const l = getLog(k); l.flow = i === 0 ? 2 : i === 1 ? 3 : i === ob.period - 1 ? 1 : 2; state.logs[k] = l; }
   save(); showMain();
 });
 
@@ -981,21 +1120,19 @@ $("#obStart").addEventListener("click", () => {
 const NATIVE = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
 const STANDALONE = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone;
 const IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const WEB = /^https?:$/.test(location.protocol) && !/claude\.(ai|site)|claudeusercontent/.test(location.hostname);
 let installEvt = null;
 const SHARE_SVG = '<svg class="share-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/></svg>';
 const bannerDismissed = () => { try { return localStorage.getItem("bloom-ib") === "1"; } catch (e) { return false; } };
-const WEB = /^https?:$/.test(location.protocol) && !/claude\.(ai|site)|claudeusercontent/.test(location.hostname);
 function showInstall(mode) {
   if (NATIVE || STANDALONE || !WEB) return;
   $("#installBox").hidden = false;
   if (!bannerDismissed()) $("#installBanner").hidden = false;
   if (mode === "ios") {
-    const t = `Tap ${SHARE_SVG} <b>Share</b> in Safari, then <b>Add to Home Screen</b>.`;
+    const t = `In Safari tap ${SHARE_SVG} <b>Share</b>, then <b>Add to Home Screen</b>.`;
     $("#installHelp").innerHTML = t; $("#ibHelp").innerHTML = t;
     $("#installBtn").hidden = true; $("#ibInstall").hidden = true;
-  } else {
-    $("#installBtn").hidden = false; $("#ibInstall").hidden = false;
-  }
+  } else { $("#installBtn").hidden = false; $("#ibInstall").hidden = false; }
 }
 async function doInstall() {
   if (!installEvt) return;
@@ -1009,15 +1146,13 @@ if (IOS) showInstall("ios");
 $("#installBtn").addEventListener("click", doInstall);
 $("#ibInstall").addEventListener("click", doInstall);
 $("#ibClose").addEventListener("click", () => { $("#installBanner").hidden = true; try { localStorage.setItem("bloom-ib", "1"); } catch (e) {} });
-if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol) && !NATIVE && !/claude\.(ai|site)|claudeusercontent/.test(location.hostname)) {
+if ("serviceWorker" in navigator && WEB && !NATIVE) {
   window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 }
 
-/* ================= keyboard / lifecycle ================= */
+/* ================= lifecycle ================= */
 document.addEventListener("keydown", e => { if (e.key === "Escape") { if ($("#dialog").classList.contains("open")) closeDialog(); else if (sheetDay) closeSheet(); } });
-// refresh when the date changes while the app is open
 document.addEventListener("visibilitychange", () => { if (!document.hidden && M && todayKey() !== M.T && state.settings.onboarded) renderAll(); });
-matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", () => M && renderDial());
 
 /* ================= boot ================= */
 (async () => {

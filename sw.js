@@ -1,5 +1,5 @@
 // Bloom service worker: works offline, gets updates when online.
-const CACHE = "bloom-v1";
+const CACHE = "bloom-v2";
 const CORE = ["./", "./index.html", "./manifest.webmanifest", "./privacy.html",
   "./icons/icon-180.png", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/maskable-512.png"];
 
